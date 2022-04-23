@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18.4)
-project(shadows CXX)
+project(shadows CXX C)
 
 include(CheckIncludeFileCXX)
 
@@ -20,7 +20,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME}
-        main.cc
+        main.cpp
         controllers/path.hpp
         controllers/path.cpp
         controllers/structure.hpp
@@ -28,7 +28,9 @@ add_executable(${PROJECT_NAME}
         controllers/grid.hpp
         controllers/grid.cpp
         controllers/structure.hpp
-        controllers/solar.cpp)
+        controllers/solar.cpp
+        sqlite/sqlite3.h
+        sqlite/sqlite3.c)
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
@@ -76,6 +78,7 @@ target_sources(
         ${FILTER_SRC}
         ${PLUGIN_SRC}
         ${MODEL_SRC})
+
 # ##############################################################################
 # uncomment the following line for dynamically loading views 
 # set_property(TARGET ${PROJECT_NAME} PROPERTY ENABLE_EXPORTS ON)

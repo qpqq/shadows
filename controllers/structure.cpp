@@ -310,7 +310,7 @@ graph::graphNode getNode(uint64_t Node) {
     return gr_node;
 }
 
-void buildings_receive_test() {
+void resp::buildings_receive_test() {
     std::string lat_low, lon_left, lat_up, lon_right;
 
     lat_low = "55.7274074";
@@ -320,7 +320,7 @@ void buildings_receive_test() {
 
     std::vector<resp::way> a;
 
-    buildings_receive("../database/shadow.db", lat_low, lon_left, lat_up, lon_right, a);
+    buildings_receive("../controllers/shadow.db", lat_low, lon_left, lat_up, lon_right, a);
     std::cout.precision(8);
     for(int i = 0; i < a.size(); ++i) {
         for(int j = 0; j < a[i].seq.size(); ++j) {
