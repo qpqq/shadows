@@ -1,6 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+#include <cmath>
+#include <thread>
+
 #include "structure.hpp"
 
 struct iPnt {

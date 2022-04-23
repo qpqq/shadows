@@ -1,10 +1,6 @@
 #include "grid.hpp"
 #include "solar.hpp"
 
-#include <iostream>
-#include <cmath>
-#include <thread>
-
 //Grid::Grid() = default;
 
 Grid::Grid(std::vector<resp::way> &ArrOfWays, double gridStep) : waysArr{ArrOfWays}, step{gridStep} {

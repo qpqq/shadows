@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <utility>
+#include <cstdio>
+#include <ctime>
 
 /**
  * The perimeter of the Earth in meters

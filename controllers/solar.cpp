@@ -1,8 +1,5 @@
 #include "solar.hpp"
 
-#include <cstdio>
-#include <ctime>
-
 double to_rad(double x) {
     return x * M_PI / 180;
 }
