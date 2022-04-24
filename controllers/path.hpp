@@ -8,6 +8,8 @@
 #include <sqlite3.h>
 #include <stdio.h>
 
+#include "database.hpp"
+
 struct graph {
     struct graphShadingEdge {
         uint64_t fineness; //Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
@@ -30,6 +32,8 @@ struct graph {
         uint64_t index;
         int fineness;
     };
+
+    static DataBase database;
 
     std::vector<graphShadingEdge> Edges;
     std::vector<graphNode> Nodes;

@@ -1,12 +1,12 @@
 #pragma once
-
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <map>
-#include "sqlite/sqlite3.h"
+#include <sqlite3.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "path.hpp"
 
@@ -44,81 +44,66 @@
 #define UNCLASSIFIED    31
 #define VIA_FERRATA     32
 
-static std::map<std::string, int> price_list = {
+std::map<std::string, int> price_list = {
 
-        {"abandoned", ABANDONED},
-        {"bridleway", BRIDLEWAY},
-        {"bus_stop", BUS_STOP},
-        {"construction", CONSTRUCTION},
-        {"corridor", CORRIDOR},
-        {"cycleway", CYCLEWAY},
-        {"elevator", ELEVATOR},
-        {"footway", FOOTWAY},
-        {"living_street", LIVING_STREET},
-        {"motorway", MOTORWAY},
-        {"path", PATH},
-        {"pedestrian", PEDESTRIAN},
-        {"platform", PLATFORM},
-        {"primary", PRIMARY},
-        {"primary_link", PRIMARY_LINK},
-        {"proposed", PROPOSED},
-        {"raceway", RACEWAY},
-        {"residential", RESIDENTIAL},
-        {"rest_area", REST_AREA},
-        {"road", ROAD},
-        {"secondary", SECONDARY},
-        {"secondary_link", SECONDARY_LINK},
-        {"service", SERVICE},
-        {"steps", STEPS},
-        {"street_lamp", STREET_LAMP},
-        {"tertiary", TERTIARY},
-        {"tertiary_link", TERTIARY_LINK},
-        {"track", TRACK},
-        {"trunk", TRUNK},
-        {"trunk_link",TRUNK_LINK},
-        {"unclassified", UNCLASSIFIED},
-        {"via_ferrata", VIA_FERRATA},
-        {"", UNDEFINED_PATH}
+    {"abandoned", ABANDONED},
+    {"bridleway", BRIDLEWAY},
+    {"bus_stop", BUS_STOP},
+    {"construction", CONSTRUCTION},
+    {"corridor", CORRIDOR},
+    {"cycleway", CYCLEWAY},
+    {"elevator", ELEVATOR},
+    {"footway", FOOTWAY},
+    {"living_street", LIVING_STREET},
+    {"motorway", MOTORWAY},
+    {"path", PATH},
+    {"pedestrian", PEDESTRIAN},
+    {"platform", PLATFORM},
+    {"primary", PRIMARY},
+    {"primary_link", PRIMARY_LINK},
+    {"proposed", PROPOSED},
+    {"raceway", RACEWAY},
+    {"residential", RESIDENTIAL},
+    {"rest_area", REST_AREA},
+    {"road", ROAD},
+    {"secondary", SECONDARY},
+    {"secondary_link", SECONDARY_LINK},
+    {"service", SERVICE},
+    {"steps", STEPS},
+    {"street_lamp", STREET_LAMP},
+    {"tertiary", TERTIARY},
+    {"tertiary_link", TERTIARY_LINK},
+    {"track", TRACK},
+    {"trunk", TRUNK},
+    {"trunk_link",TRUNK_LINK},
+    {"unclassified", UNCLASSIFIED},
+    {"via_ferrata", VIA_FERRATA},
+    {"", UNDEFINED_PATH}
 };
 
-namespace resp {
-
-    struct node {
-        unsigned long long int                  id;
-        double                                  lat;
-        double                                  lon;
-        std::map<std::string, std::string>      tags;
-    };
-
-    struct way {
-        unsigned long long int                  id;
-        std::vector<node>                       seq;
-        std::map<std::string, std::string>      tags;
-    };
-
-    struct mate {
-        unsigned long long int      prev;           // previous node in the array
-        unsigned long long int      next;           // next node in the array
-        std::string                 path_type;      // way_tag for classifying roads
-    };
-
-    int buildings_receive(const char *db_path, std::string lat_low, std::string lon_left, std::string lat_up, std::string lon_right, std::vector<resp::way> &build);
-
-    int neighbours_receive(const char *db_path, std::string node_id, std::vector<resp::mate> &mates);
-
-    int define_fine(std::string path_type);
-
-    int node_coord(const char *db_path, std::string node_id, resp::node &ret);
-
-    void buildings_receive_test();
-
+struct node {
+    unsigned long long int                  id;
+    double                                  lat;
+    double                                  lon;
+    std::map<std::string, std::string>      tags;
 };
 
-std::vector<graph::weightNode> getadjacencyMatrix(uint64_t Node);
-graph::graphNode getNode(uint64_t Node);
-void getadjacencyMatrix_test();
-void getNode_test();
-
-class DataBase {
-
+struct way {
+    unsigned long long int                  id;
+    std::vector<node>                       seq;
+    std::map<std::string, std::string>      tags;
 };
+
+struct mate {
+    unsigned long long int      prev;           // previous node in the array
+    unsigned long long int      next;           // next node in the array
+    std::string                 path_type;      // way_tag for classifying roads
+};
+
+void buildings_receive(DataBase &database, std::string lat_low, std::string lon_left, std::string lat_up, std::string lon_right, std::vector<way> &build);
+
+void neighbours_receive(DataBase &database, std::string node_id, std::vector<mate> &mates);
+
+int define_fine(std::string path_type);
+
+void node_coord(DataBase &database, std::string node_id, node &ret);
