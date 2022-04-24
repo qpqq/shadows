@@ -38,7 +38,7 @@ git submodule update --init --recursive
 cd build
 cmake ..
 make
-./shadows
+sudo ./shadows
 ```
 
 Дальше вбить в браузере `localhost` или `http://localhost`, откроется сам сайт
