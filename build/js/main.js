@@ -48,11 +48,9 @@ ymaps.ready(function () {
     	if(!toFromChecker){
     		toLocation = coords;
 	    	toLocationInput.value = toLocation;
-	    	console.log(toLocation);
     	}else{
     		fromLocation = coords;
     		fromLocationInput.value = fromLocation;
-    		console.log(fromLocation);
     	}
     	if(!disableAutoSwap) toFromChecker = !toFromChecker;
     	
@@ -103,7 +101,8 @@ ymaps.ready(function () {
 
     var fromToLocations = [];
 
-    
+    var loader = document.getElementById("loader");
+
     const connection = new WebSocket("ws://localhost/echo");
     
 
@@ -116,21 +115,31 @@ ymaps.ready(function () {
 	    		fromLocation: fromLocation,
 	    		toLocation: toLocation
 	    	}));	
+	    	loader.style.display = "block";
     	}
 	}
 
 	connection.onmessage = (e) => {
-		routeCoords = JSON.parse(e.data);
-		let route = new ymaps.multiRouter.MultiRoute({
-			referencePoints: routeCoords["routeCoords"],
-			params: {
-				routingMode: "pedestrian"
-			}
-		}, {
-			boundsAutoApply: true
-		});
-		myMap.geoObjects.removeAll();
-		myMap.geoObjects.add(route);
+		if(e.data != ""){
+			routeCoords = JSON.parse(e.data);
+			let route = new ymaps.multiRouter.MultiRoute({
+				referencePoints: routeCoords["routeCoords"],
+				params: {
+					routingMode: "pedestrian"
+				}
+			}, {
+				boundsAutoApply: true
+			});
+			myMap.geoObjects.removeAll();
+			placemark1 = placemark2 = null;
+			myMap.geoObjects.add(route);
+			loader.style.display = "none";
+		}
+		else{
+			connection.send("");
+		}
+		
+
 	}
 
 
@@ -142,7 +151,6 @@ ymaps.ready(function () {
  		myMap.geoObjects.remove(placemark2); 
  		placemark1 = placemark2 = null;
  		toFromChecker = true;
- 		console.log("clear")
  	}
 
  	var clearMapButton = document.getElementById("clearMap");
