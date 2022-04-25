@@ -21,13 +21,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME}
         main.cpp
-        controllers/path.hpp
-        controllers/path.cpp
+        controllers/graph.hpp
+        controllers/graph.cpp
         controllers/structure.hpp
         controllers/structure.cpp
+        controllers/database.hpp
+        controllers/database.cpp
         controllers/grid.hpp
         controllers/grid.cpp
-        controllers/structure.hpp
         controllers/solar.cpp
         sqlite/sqlite3.h
         sqlite/sqlite3.c)

@@ -3,7 +3,7 @@
 
 //Grid::Grid() = default;
 
-Grid::Grid(std::vector<resp::way> &ArrOfWays, double gridStep) : waysArr{ArrOfWays}, step{gridStep} {
+Grid::Grid(std::vector<way> &ArrOfWays, double gridStep) : waysArr{ArrOfWays}, step{gridStep} {
     min_lat = 90;
     max_lat = -90;
     min_lon = 180;

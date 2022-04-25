@@ -27,13 +27,13 @@ if the query returns an integer but the sqlite3_column_text() interface is used 
 
 */
 
-DataBase::DataBase(std::string path) {
+DataBase::DataBase(const std::string &path) {
     int flag;
     this->path = path.c_str();
     std::cout << "Opening " + path + " ";
     flag = sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, NULL);
 
-    if(flag != SQLITE_OK) {
+    if (flag != SQLITE_OK) {
         std::cout << "failed" << std::endl;
         std::cerr << "response: " << sqlite3_errmsg(db) << std::endl;
         assert(flag == SQLITE_OK);
@@ -54,12 +54,12 @@ DataBase::~DataBase() {
     sqlite3_close(db);
 }
 
-Request::Request(DataBase &database, std::string query) {
+Request::Request(DataBase &database, const std::string& query) {
     int flag;
     sqlite3 *db = database.get_pointer();
     this->query = query.c_str();
     flag = sqlite3_prepare_v2(db, this->query, -1, &stmt, NULL);
-    
+
     if (flag != SQLITE_OK) {
         std::cerr << "Request.sqlite3_prepare_v2 failed: errcode = " << flag << std::endl;
         std::cerr << sqlite3_errmsg(db) << std::endl;

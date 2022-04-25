@@ -26,7 +26,7 @@ struct iPnt {
 class Grid {
 private:
 
-    std::vector<resp::way> &waysArr;
+    std::vector<way> &waysArr;
 
     double step;
 
@@ -51,7 +51,7 @@ public:
 
 //    Grid();
 
-    Grid(std::vector<resp::way> &ArrOfWays, double gridStep);
+    Grid(std::vector<way> &ArrOfWays, double gridStep);
 
     void plot(iPnt p, int value);
 

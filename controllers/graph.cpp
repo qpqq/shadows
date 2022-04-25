@@ -1,10 +1,10 @@
 #include <iostream>
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include <map>
 
-#include "path.hpp"
+#include "graph.hpp"
 
 template<typename T>
 struct minSet {
@@ -128,30 +128,30 @@ struct minSet {
     }
 };
 
-graph::graphNode graph::getNode(uint64_t Node) {
+Graph::graphNode Graph::getNode(uint64_t Node) {
     return Nodes[Node];
 }
 
-graph::graph() {
+Graph::Graph() {
 
 }
 
-graph::~graph() {
+Graph::~Graph() {
 
 }
 
-double graph::getShading(graph::graphNode Node1, graph::graphNode Node2) {
+double Graph::getShading(Graph::graphNode Node1, Graph::graphNode Node2) {
     return getLength2(Node1, Node2);
 }
 
-graph::graphShadingEdge graph::getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2) {
+Graph::graphShadingEdge Graph::getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2) {
     graphShadingEdge gse = {1, getShading(getNode(Node1), getNode(Node2)), getLength2(getNode(Node1), getNode(Node2)),
                             Node1, Node2};
     return gse;
 }
 
-std::vector<graph::weightNode> graph::getadjacencyMatrix(uint64_t Node) {
-    return std::vector<graph::weightNode>();
+std::vector<Graph::weightNode> Graph::getAdjacencyMatrix(uint64_t Node) {
+    return {};
 }
 
 /*
@@ -322,18 +322,18 @@ struct valueSet {
     }
 };
 
-double graph::getLength2(graph::graphNode Node1, graph::graphNode Node2) {
+double Graph::getLength2(Graph::graphNode Node1, Graph::graphNode Node2) {
     return 111200 * acos(sin(Node1.x) * sin(Node2.x) + cos(Node1.x) * cos(Node2.x) * cos(Node2.x - Node2.y));
 }
 
-double getRemotennesWeight(graph &_graph, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
+double getRemotennesWeight(Graph &_graph, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
     // -O(exp(x^2))
     return std::min(std::exp(_graph.getLength2(_graph.getNode(startNode), _graph.getNode(EdgeNode)) / fineness),
                     std::exp(_graph.getLength2(_graph.getNode(endNode), _graph.getNode(EdgeNode))) / fineness);
 }
 
 double
-getEdgeWeight(graph &_graph, double shading, double length, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode,
+getEdgeWeight(Graph &_graph, double shading, double length, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode,
               double fineness) {
     return shading + 0.1 * length + getRemotennesWeight(_graph, startNode, endNode, EdgeNode, fineness);
 }
@@ -346,11 +346,11 @@ std::vector<double> trans_finesness = {
 };
 
 
-graph::graphRoute graph::getRoute(uint64_t startNode, uint64_t endNode) {
+Graph::graphRoute Graph::getRoute(uint64_t startNode, uint64_t endNode) {
     minimumsSet minSet;
     usedSet usedSet;
     valueSet valueSet;
-    graph::graphRoute ans;
+    Graph::graphRoute ans;
     bool getans = false;
     minSet.update(startNode, 0, 0, 0);
     valueSet.update(startNode, 0, 0, 0);
@@ -368,8 +368,8 @@ graph::graphRoute graph::getRoute(uint64_t startNode, uint64_t endNode) {
             }
             break;
         }
-        for (auto &e: getadjacencyMatrix(el.nodeIndex)) {
-            graph::graphShadingEdge curEdge = getShadingEdge(e.fineness, el.nodeIndex, e.index);
+        for (auto &e: getAdjacencyMatrix(el.nodeIndex)) {
+            Graph::graphShadingEdge curEdge = getShadingEdge(e.fineness, el.nodeIndex, e.index);
             double new_length = el.key +
                                 getEdgeWeight(*this, curEdge.shading, curEdge.length, startNode, endNode, curEdge.node,
                                               trans_finesness[curEdge.fineness]);
@@ -387,10 +387,10 @@ graph::graphRoute graph::getRoute(uint64_t startNode, uint64_t endNode) {
 }
 
 int pathTest() {
-    graph plGraph;
+    Graph plGraph;
     uint64_t node1, node2;
     std::cin >> node1 >> node2;
-    graph::graphRoute route = plGraph.getRoute(node1, node2);
+    Graph::graphRoute route = plGraph.getRoute(node1, node2);
     std::cout << route.shading << std::endl;
     for (auto &e: route.Nodes) {
         std::cout << e.x << e.y << " ";

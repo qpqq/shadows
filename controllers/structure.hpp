@@ -1,14 +1,15 @@
 #pragma once
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <map>
-#include <sqlite3.h>
 #include <stdio.h>
 #include <assert.h>
 
-#include "path.hpp"
+#include "sqlite/sqlite3.h"
+#include "graph.hpp"
 
 #define UNDEFINED_PATH  120 // empty string received
 #define ABANDONED       1
@@ -44,8 +45,7 @@
 #define UNCLASSIFIED    31
 #define VIA_FERRATA     32
 
-std::map<std::string, int> price_list = {
-
+static std::map<std::string, int> price_list = {
     {"abandoned", ABANDONED},
     {"bridleway", BRIDLEWAY},
     {"bus_stop", BUS_STOP},
@@ -100,10 +100,10 @@ struct mate {
     std::string                 path_type;      // way_tag for classifying roads
 };
 
-void buildings_receive(DataBase &database, std::string lat_low, std::string lon_left, std::string lat_up, std::string lon_right, std::vector<way> &build);
+void buildings_receive(DataBase &database, std::string &lat_low, std::string &lon_left, std::string &lat_up, std::string &lon_right, std::vector<way> &build);
 
-void neighbours_receive(DataBase &database, std::string node_id, std::vector<mate> &mates);
+void neighbours_receive(DataBase &database, const std::string &node_id, std::vector<mate> &mates);
 
-int define_fine(std::string path_type);
+int define_fine(const std::string &path_type);
 
-void node_coord(DataBase &database, std::string node_id, node &ret);
+void node_coord(DataBase &database, const std::string &node_id, node &ret);
