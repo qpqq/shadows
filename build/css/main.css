@@ -21,34 +21,64 @@ html, body{
 	margin-top: 10px;
 }
 
+.ymaps-2-1-79-searchbox-button{
+  background-color: #0066ff !important;
+  color: white !important;
+}
+
+.ymaps-2-1-79-searchbox-input.ymaps-2-1-79-_focused{
+  box-shadow: inset 0 0 0 2px #0066ff !important;
+}
+
+.ymaps-2-1-79-search__suggest-catalog-item.ymaps-2-1-79-search__suggest-item_selected_yes:after, .ymaps-2-1-79-search__suggest-catalog-item:hover:after{
+  background-color: #0066ff !important;
+}
+
+.ymaps-2-1-79-islets_serp-item.ymaps-2-1-79-islets__selected:hover .ymaps-2-1-79-islets_card__status-time-text, .ymaps-2-1-79-islets_serp-item:hover .ymaps-2-1-79-islets_card__status-time-text,.ymaps-2-1-79-islets_serp-item.ymaps-2-1-79-islets__selected:hover, .ymaps-2-1-79-islets_serp-item:hover, .ymaps-2-1-79-islets_serp-item.ymaps-2-1-79-islets__selected:hover .ymaps-2-1-79-islets_card__description, .ymaps-2-1-79-islets_serp-item:hover .ymaps-2-1-79-islets_card__description{
+  background-color: #0067FF !important;
+  border-color: #0067FF !important;
+  color: white !important;
+} 
+
+.ymaps-2-1-79-islets_serp-item.ymaps-2-1-79-islets__selected:hover .ymaps-2-1-79-islets_serp-item__title, .ymaps-2-1-79-islets_serp-item:hover .ymaps-2-1-79-islets_serp-item__title{
+  color: white;
+  font-weight: bold;
+}
+
 button{
 	height: 42px;
 	padding: 5px 10px;
 	font-size: 19px;
 	border-radius: 12px;
 	text-align: center;
-	transition: background-color .35s;
-	border: 1.5px solid #f5f5f5;
-	background-color: #f5f5f5;
+	transition: .15s;
+	border: 1.5px solid #0066ff;
+	background-color: #0066ff;
+  color: white;
 }
 
 button:hover{
+  color: #0066ff;
 	background-color: white;
 	cursor: pointer;
-	border: 1.5px solid #c9c9c9;
+	border: 1.5px solid #0066ff;
 }
 
-input{
+.input{
 	height: 36px;
 	border-radius: 5px;
-	border: 1.5px solid #f5f5f5;
+	border: 1.5px solid #c9c9c9;
 	font-size: 17px;
 	padding-left: 5px;
 	padding-top: 0;
 	padding-bottom: 0;
 }
 
-input:focus{
+.input::placeholder{
+  color: #c9c9c9;
+}
+
+.input:focus{
 	outline: 1.5px solid #c9c9c9;
 
 }
@@ -57,7 +87,7 @@ input:focus{
 
 #loader {
 	display: none;
-	color: gray;
+	color: #0066ff;
 	font-size: 20px;
 	width: 40px;
 	height: 40px;

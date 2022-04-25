@@ -27,10 +27,10 @@ ymaps.ready(function () {
 
     var searchControl = new ymaps.control.SearchControl({
     	options: {
-    		provider: 'yandex#search'
+    		provider: 'yandex#search',
+            
     	}
     });
-
     var toLocation, fromLocation = [];
 
 
@@ -128,8 +128,18 @@ ymaps.ready(function () {
 					routingMode: "pedestrian"
 				}
 			}, {
-				boundsAutoApply: true
+                boundsAutoApply: true,
+
+                 wayPointStartIconFillColor: '#1E98FF',
+                 wayPointFinishIconFillColor: 'red',
+
+                routeActivePedestrianSegmentStrokeStyle: "solid",
+                routeActivePedestrianSegmentStrokeColor: "#0066ff",
+                routeActivePedestrianSegmentStrokeOpacity: '1',
+                routePedestrianSegmentStrokeOpacity: "0.5",
+                routePedestrianSermentStrokeColor: '#0066ff'
 			});
+
 			myMap.geoObjects.removeAll();
 			placemark1 = placemark2 = null;
 			myMap.geoObjects.add(route);
