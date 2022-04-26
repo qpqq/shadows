@@ -107,3 +107,5 @@ void neighbours_receive(DataBase &database, const std::string &node_id, std::vec
 int define_fine(const std::string &path_type);
 
 void node_coord(DataBase &database, const std::string &node_id, node &ret);
+
+// void closestNode(DataBase &database, const std::string &lat, const std::string &lon, node &ret);

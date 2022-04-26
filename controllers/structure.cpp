@@ -207,34 +207,68 @@ void buildings_receive_test() {
     }
 }
 
-//void getAdjacencyMatrix_test() {
-//    std::cout << "getAdjacencyMatrix_test() called" << std::endl;
-//    uint64_t node_id = 1540431697;
-//    std::cout << "calling getAdjacencyMatrix(node_id) with node_id = " + std::to_string(node_id) << std::endl;
-//    std::vector<Graph::weightNode> test = getAdjacencyMatrix(node_id);
-//    for (auto &x: test) {
-//        std::cout << "index: " << x.index << " " << "fineness: " << x.fineness << std::endl;
-//    }
-//}
+// void closestNode(DataBase &database, const std::string &lat, const std::string &lon, node &ret) {
+//     std::string query, sq, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
+//     double radius = 0.0003125; // 0.125 km
+//     unsigned int i;
 
-//void getNode_test() {
-//    std::cout << "getNode_test() called" << std::endl;
-//    uint64_t node_id = 1540431697;
-//    std::cout << "calling getNode(node_id) with node_id = " + std::to_string(node_id) << std::endl;
-//    Graph::graphNode test = getNode(node_id);
-//    std::cout.precision(10);
-//
-//    std::cout << "x: " << test.x << " " << "y: " << test.y << std::endl;
-//}
+//     ret.id = 0;
+//     ret.lat = -1.0;
+//     ret.lon = -1.0;
 
-//int structureTest() {
-//
-//    getAdjacencyMatrix_test();
-//    getNode_test();
-//    buildings_receive_test();
-//
-//    return 0;
-//}
+//     sq = "sqrt((lat - " + lat + ")*(lat - " + lat + ") + (lon - " + lon + ")*(lon - " + lon + "))";
+
+//     // searching for the closest node by accumulating the radius 
+//     for (i = 1; i < 9; ++i) {
+        
+//         radius += radius;
+//         _radius = std::to_string(radius);
+//         dlat_minus =    lat + " - " + _radius;
+//         dlat_plus  =    lat + " + " + _radius;
+//         dlon_minus =    lon + " - " + _radius;
+//         dlon_plus =     lon + " + " + _radius;
+
+//         query = "SELECT node_id, lat, lon, " + sq + " AS rho "
+//                 "FROM nodes "
+//                 "WHERE lat BETWEEN " + dlat_minus + " AND " + dlat_plus + " AND lon BETWEEN " + dlon_minus + " AND " + dlon_plus + " AND rho != 0 "
+//                 "ORDER BY rho ASC "
+//                 "LIMIT 1;";
+
+//         Request req(database, query);
+
+//         while (req.step() != SQLITE_DONE) {
+//             req.data(ret.id, 0);
+//             req.data(ret.lat, 1);
+//             req.data(ret.lon, 2);
+//         }
+
+//         if (ret.lat != -1.0 && ret.lon != -1.0) {
+//             break;
+//         }
+
+//     }
+//     // RunTimeError assertion
+//     assert(ret.lat != -1.0 && ret.lon != -1.0);
+// }
+
+/*
+
+    Исправления
+
+        1. closestNode в structure.cpp
+        2. closestNode в structure.hpp
+
+    Получение объектных файлов
+
+    gcc -c sqlite/sqlite3.c -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS
+    с++ -с database.cpp
+    c++ -c structure.cpp
+
+    Получение исполняемого
+
+    c++ structure.o database.o sqlite3.o
+    
+*/
 
 /*
     5. map переписать в json?
