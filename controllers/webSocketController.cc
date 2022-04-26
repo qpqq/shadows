@@ -41,10 +41,7 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
         std::string resRouteCoords = Json::writeString(builder, sendRoot);
 
         wsConnPtr->send(resRouteCoords);
-    } else {
-        wsConnPtr->send(message);
     }
-
 }
 
 void webSocketController::handleNewConnection(const HttpRequestPtr &req, const WebSocketConnectionPtr &wsConnPtr) {

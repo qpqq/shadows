@@ -31,7 +31,7 @@ html, body{
 }
 
 .ymaps-2-1-79-search__suggest-catalog-item.ymaps-2-1-79-search__suggest-item_selected_yes:after, .ymaps-2-1-79-search__suggest-catalog-item:hover:after{
-  background-color: #0066ff !important;
+  background-color: #b0d0ff !important;
 }
 
 .ymaps-2-1-79-islets_serp-item.ymaps-2-1-79-islets__selected:hover .ymaps-2-1-79-islets_card__status-time-text, .ymaps-2-1-79-islets_serp-item:hover .ymaps-2-1-79-islets_card__status-time-text,.ymaps-2-1-79-islets_serp-item.ymaps-2-1-79-islets__selected:hover, .ymaps-2-1-79-islets_serp-item:hover, .ymaps-2-1-79-islets_serp-item.ymaps-2-1-79-islets__selected:hover .ymaps-2-1-79-islets_card__description, .ymaps-2-1-79-islets_serp-item:hover .ymaps-2-1-79-islets_card__description{
