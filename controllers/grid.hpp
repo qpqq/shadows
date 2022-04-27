@@ -5,8 +5,11 @@
 #include <cmath>
 #include <thread>
 
-#include "structure.hpp"
+#include "database.hpp"
 
+/**
+ * Point on the grid
+ */
 struct iPnt {
     int x;
     int y;
@@ -24,6 +27,7 @@ struct iPnt {
  */
 
 class Grid {
+
 private:
 
     std::vector<way> &waysArr;

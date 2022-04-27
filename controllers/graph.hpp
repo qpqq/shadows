@@ -5,12 +5,16 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <stdio.h>
+#include <cstdio>
+#include <cmath>
 
 #include "sqlite/sqlite3.h"
 #include "database.hpp"
 
-struct Graph {
+class Graph {
+
+private:
+
     struct graphShadingEdge {
         uint64_t fineness; // Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
         double shading; // Затененность дороги выраженная в длине незатененной части
@@ -32,21 +36,43 @@ struct Graph {
         int fineness;
     };
 
-    static DataBase database;
-
     std::vector<graphShadingEdge> Edges;
     std::vector<graphNode> Nodes;
     std::vector<std::vector<weightNode>> adjacencyMatrix;
 
-    graphShadingEdge getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2);
+public:
 
-    graphNode getNode(uint64_t Node); // --map
-    double getShading(graphNode Node1, graphNode Node2); // -shading в метрах
-    graphRoute getRoute(uint64_t startNode, uint64_t endNode); // ---output
-    std::vector<weightNode> getAdjacencyMatrix(uint64_t Node); // -map
-    double getLength2(graphNode Node1, graphNode Node2);
+    DataBase database;
 
+    /**
+    * Default constructor
+    */
     Graph();
 
+    /**
+    * Constructor with a database path
+    * @param path to database
+    *
+    * Single-argument constructors must be marked explicit to avoid unintentional implicit conversions
+    */
+    explicit Graph(const std::string &path);
+
     ~Graph();
+
+    graphNode getNode(uint64_t Node); // -map
+
+    static double getShading(graphNode Node1, graphNode Node2); // -shading в метрах
+
+    graphShadingEdge getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2);
+
+    std::vector<weightNode> getAdjacencyMatrix(uint64_t Node); // -map
+
+    static double getLength2(graphNode Node1, graphNode Node2);
+
+    double getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
+
+    double getEdgeWeight(double shading, double length,
+                         uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
+
+    graphRoute getRoute(uint64_t startNode, uint64_t endNode); // -output
 };
