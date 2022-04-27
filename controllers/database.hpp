@@ -67,6 +67,8 @@ public:
     std::vector<way>
     buildings_receive(std::string &lat_low, std::string &lon_left, std::string &lat_up, std::string &lon_right);
 
+    void buildings_receive_test();
+
     unsigned long long int closestNode(const std::string &lat, const std::string &lon);
 };
 

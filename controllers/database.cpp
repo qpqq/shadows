@@ -127,6 +127,31 @@ DataBase::buildings_receive(std::string &lat_low, std::string &lon_left, std::st
     return build;
 }
 
+void DataBase::buildings_receive_test() {
+    std::string lat_low, lon_left, lat_up, lon_right;
+
+    lat_low = "55.7274074";
+    lon_left = "37.5765893";
+    lat_up = "55.8322596";
+    lon_right = "37.7582195";
+
+    std::vector<way> a;
+
+    a = buildings_receive(lat_low, lon_left, lat_up, lon_right);
+    std::cout.precision(8);
+    for (int i = 0; i < a.size(); ++i) {
+        for (int j = 0; j < a[i].seq.size(); ++j) {
+            std::cout << "id: " << a[i].seq[j].id << " ";
+            std::cout << "lat: " << a[i].seq[j].lat << " ";
+            std::cout << "lon: " << a[i].seq[j].lon << " ";
+            std::cout << "way_tag_value: " << a[i].tags.begin()->second << std::endl;
+        }
+        if (i == 1) {
+            break;
+        }
+    }
+}
+
 unsigned long long int DataBase::closestNode(const std::string &lat, const std::string &lon) {
     std::string query, sq, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
     double radius = 0.0003125; // 0.125 km
@@ -186,7 +211,6 @@ Request::Request(DataBase &database, const std::string &query) {
         std::cerr << sqlite3_errmsg(db) << std::endl;
         assert(flag == SQLITE_OK);
     }
-
 }
 
 int Request::step() {

@@ -8,7 +8,6 @@
 #include <cstdio>
 #include <cmath>
 
-#include "sqlite/sqlite3.h"
 #include "database.hpp"
 
 class Graph {
