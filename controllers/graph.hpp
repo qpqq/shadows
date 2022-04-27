@@ -60,13 +60,13 @@ public:
 
     graphNode getNode(uint64_t Node); // -map
 
-    static double getShading(graphNode Node1, graphNode Node2); // -shading в метрах
+    double getShading(graphNode Node1, graphNode Node2); // -shading в метрах
 
     graphShadingEdge getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2);
 
     std::vector<weightNode> getAdjacencyMatrix(uint64_t Node); // -map
 
-    static double getLength2(graphNode Node1, graphNode Node2);
+    double getLength2(graphNode Node1, graphNode Node2);
 
     double getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
 

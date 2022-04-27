@@ -15,9 +15,11 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
         std::vector<std::string> toLocation = {recRoot["toLocation"][0].asString(),
                                                recRoot["toLocation"][1].asString()}; //to location coords JSON -> cpp array convert
 
-        Graph city("../controllers/shadow.db");
-        auto route = city.getRoute(city.database.closestNode(fromLocation[0], fromLocation[1]),
-                                   city.database.closestNode(toLocation[0], toLocation[1]));
+        DataBase db("../controllers/shadow.db");
+        Graph city;
+        city.database = db;
+        auto route = city.getRoute(db.closestNode(fromLocation[0], fromLocation[1]),
+                                   db.closestNode(toLocation[0], toLocation[1]));
 
         double routeCoords[2][2] = {
                 {
