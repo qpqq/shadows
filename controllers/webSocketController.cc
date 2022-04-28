@@ -22,13 +22,13 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
                 db.closestNode(fromLocation[0], fromLocation[1]),
                 db.closestNode(toLocation[0], toLocation[1]));
 
-        double routeCoords[2][2] = {
-                {
-                        std::stof(recRoot["fromLocation"][0].asString()),
-                        std::stof(recRoot["fromLocation"][1].asString())},
-                {
-                        std::stof(recRoot["toLocation"][0].asString()),
-                        std::stof(recRoot["toLocation"][1].asString())}};
+//        double routeCoords[2][2] = {
+//                {
+//                        std::stof(recRoot["fromLocation"][0].asString()),
+//                        std::stof(recRoot["fromLocation"][1].asString())},
+//                {
+//                        std::stof(recRoot["toLocation"][0].asString()),
+//                        std::stof(recRoot["toLocation"][1].asString())}};
 
         Json::Value sendRoot;
 //        for (int i = 0; i < 2; i++) { //2 -> route.coords.size()

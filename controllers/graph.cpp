@@ -51,7 +51,7 @@ graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
     minSet.update(startNode, 0, 0, 0);
     valueSet.update(startNode, 0, 0, 0);
     usedSet.update(0, 0);
-    while (getans == 0 || minSet.is_empty() == 0) {
+    while (minSet.is_empty() == 0) {
         minimumsSet::minimumsSetElement el = minSet.getMinimum();
         if (el.nodeIndex == endNode) {
             getans = true;
