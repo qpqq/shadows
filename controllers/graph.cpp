@@ -53,8 +53,10 @@ graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
     minSet.update(startNode, 0, 0, 0);
     valueSet.update(startNode, 0, 0, 0);
     usedSet.update(0, 0);
+	int cnt = 0;
     while (minSet.is_empty() == 0) {
         minimumsSet::minimumsSetElement el = minSet.getMinimum();
+	std::cout << el.nodeIndex << " node cnt:" << cnt << std::endl;
         if (el.nodeIndex == endNode) {
             getans = true;
             uint64_t node = endNode;
@@ -75,10 +77,12 @@ graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
             if (usedSet.get(curEdge.node) == 0 &&
                 (minSet.get(curEdge.node).inf || minSet.get(curEdge.node).key > new_length)) {
                 minSet.update(curEdge.node, new_length, e.index, new_shading);
+		    cnt++;
                 valueSet.update(curEdge.node, new_shading, e.index, el.nodeIndex);
             }
         }
         minSet.erase(el.nodeIndex);
+	    cnt--;
         usedSet.update(el.nodeIndex, 1);
     }
     return ans;
