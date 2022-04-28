@@ -41,6 +41,8 @@ add_executable(${PROJECT_NAME}
 #        controllers/path.hpp
         )
 
+target_compile_options(${PROJECT_NAME} PRIVATE -O3)
+
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
 # to add drogon 
