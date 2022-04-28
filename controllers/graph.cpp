@@ -17,8 +17,8 @@ graphShadingEdge Graph::getShadingEdge(DataBase &db, uint64_t fineness, uint64_t
     graphShadingEdge gse = {1,
                             getShading(getNode(db, Node1), getNode(db, Node2)),
                             getLength2(getNode(db, Node1), getNode(db, Node2)),
-                            Node1,
-                            Node2};
+                            Node2,
+                            Node1};
     return gse;
 }
 
