@@ -1,8 +1,22 @@
 #include <vector>
 #include <string>
+#include <iomanip>
 
 #include "webSocketController.h"
 #include "graph.hpp"
+
+/**
+ * Converts doubles to string with the specified precision.
+ * @param x double
+ * @param n number of digits after the decimal iPnt
+ * @return string
+ */
+std::string toStringWithPrecision(double x, const int n = 10) {
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << x;
+    return out.str();
+}
 
 void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnPtr, std::string &&message,
                                            const WebSocketMessageType &type) {
@@ -40,15 +54,20 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
 //                        std::stof(recRoot["toLocation"][1].asString())}};
 
         Json::Value sendRoot;
+
+        if (!route.Nodes.empty()) {
 //        for (int i = 0; i < 2; i++) { //2 -> route.coords.size()
-        for (int i = 0; i < route.Nodes.size(); i++) {
-            Json::Value routeCoordN;
+            for (int i = 0; i < route.Nodes.size(); i++) {
+                Json::Value routeCoordN;
 //            routeCoordN[0] = routeCoords[i][0]; //routeCoords[i][0] -> route.coords[i].lat
 //            routeCoordN[1] = routeCoords[i][1]; //routeCoords[i][1] -> route.coords[i].lon
-            routeCoordN[0] = route.Nodes[i].x;
-            routeCoordN[1] = route.Nodes[i].y;
-            sendRoot["routeCoords"][i] = routeCoordN;
-        }
+                routeCoordN[0] = toStringWithPrecision(route.Nodes[i].x);
+                routeCoordN[1] = toStringWithPrecision(route.Nodes[i].y);
+                sendRoot["routeCoords"][i] = routeCoordN;
+            }
+        } else
+            sendRoot["routeCoords"] = ' ';
+
         Json::StreamWriterBuilder builder;
         std::string resRouteCoords = Json::writeString(builder, sendRoot);
 
