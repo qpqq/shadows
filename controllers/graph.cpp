@@ -34,7 +34,8 @@ double
 Graph::getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
     // -O(exp(x^2))
 	double ans = std::min(std::exp(_graph.getLength2(_graph.getNode(startNode), _graph.getNode(EdgeNode)) / fineness), std::exp(_graph.getLength2(_graph.getNode(endNode), _graph.getNode(EdgeNode))) / fineness);
-	return std::min(ans, 100.0);
+	//return std::min(ans, 100.0);
+	return 1.0;
 }
 
 double Graph::getEdgeWeight(DataBase &db, double shading, double length, uint64_t startNode, uint64_t endNode,
