@@ -288,9 +288,12 @@ unsigned long long int DataBase::closestNode(const std::string &lat, const std::
         dlon_minus =    lon + " - " + _radius;
         dlon_plus =     lon + " + " + _radius;
 
-        query = "SELECT node_id, lat, lon, " + sq + " AS rho "
+        query = "SELECT nodes.node_id, lat, lon, " + sq + " AS rho "
                 "FROM nodes "
-                "WHERE lat BETWEEN " + dlat_minus + " AND " + dlat_plus + " AND lon BETWEEN " + dlon_minus + " AND " + dlon_plus + " AND rho != 0 "
+                "JOIN ways ON ways.node_id = nodes.node_id "
+                "JOIN way_tags ON way_tags.way_id = ways.way_id "
+                "WHERE way_tags.tag_key = 'highway' AND lat BETWEEN " + dlat_minus + " AND " + dlat_plus + " AND lon BETWEEN " + dlon_minus + " AND " + dlon_plus + " AND rho != 0 "
+                "GROUP BY nodes.node_id "
                 "ORDER BY rho ASC "
                 "LIMIT 1;";
 
@@ -322,7 +325,7 @@ Request::Request(DataBase &database, const std::string &query) {
 
     if (flag != SQLITE_OK) {
         std::cerr << "Request.sqlite3_prepare_v2 failed: errcode = " << flag << std::endl;
-        std::cerr << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "response: " << sqlite3_errmsg(db) << std::endl;
         assert(flag == SQLITE_OK);
     }
 }
