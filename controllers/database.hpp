@@ -44,59 +44,23 @@
 #define UNCLASSIFIED    31
 #define VIA_FERRATA     32
 
-static std::map<std::string, int> price_list = {
-        {"abandoned", ABANDONED},
-        {"bridleway", BRIDLEWAY},
-        {"bus_stop", BUS_STOP},
-        {"construction", CONSTRUCTION},
-        {"corridor", CORRIDOR},
-        {"cycleway", CYCLEWAY},
-        {"elevator", ELEVATOR},
-        {"footway", FOOTWAY},
-        {"living_street", LIVING_STREET},
-        {"motorway", MOTORWAY},
-        {"path", PATH},
-        {"pedestrian", PEDESTRIAN},
-        {"platform", PLATFORM},
-        {"primary", PRIMARY},
-        {"primary_link", PRIMARY_LINK},
-        {"proposed", PROPOSED},
-        {"raceway", RACEWAY},
-        {"residential", RESIDENTIAL},
-        {"rest_area", REST_AREA},
-        {"road", ROAD},
-        {"secondary", SECONDARY},
-        {"secondary_link", SECONDARY_LINK},
-        {"service", SERVICE},
-        {"steps", STEPS},
-        {"street_lamp", STREET_LAMP},
-        {"tertiary", TERTIARY},
-        {"tertiary_link", TERTIARY_LINK},
-        {"track", TRACK},
-        {"trunk", TRUNK},
-        {"trunk_link",TRUNK_LINK},
-        {"unclassified", UNCLASSIFIED},
-        {"via_ferrata", VIA_FERRATA},
-        {"", UNDEFINED_PATH}
-};
-
 struct node {
-    unsigned long long int                  id;
-    double                                  lat;
-    double                                  lon;
-    std::map<std::string, std::string>      tags;
+    unsigned long long int id;
+    double lat;
+    double lon;
+    std::map<std::string, std::string> tags;
 };
 
 struct way {
-    unsigned long long int                  id;
-    std::vector<node>                       seq;
-    std::map<std::string, std::string>      tags;
+    unsigned long long int id;
+    std::vector<node> seq;
+    std::map<std::string, std::string> tags;
 };
 
 struct mate {
-    unsigned long long int      prev;           // previous node in the array
-    unsigned long long int      next;           // next node in the array
-    std::string                 path_type;      // way_tag for classifying roads
+    unsigned long long int prev;           // previous node in the array
+    unsigned long long int next;           // next node in the array
+    std::string path_type;      // way_tag for classifying roads
 };
 
 struct graphShadingEdge {
@@ -125,8 +89,44 @@ struct weightNode {
 class DataBase {
 
 private:
-    const char  *path{};
-    sqlite3     *db{};
+    const char *path{};
+    sqlite3 *db{};
+
+    std::map<std::string, int> price_list = {
+            {"abandoned",      ABANDONED},
+            {"bridleway",      BRIDLEWAY},
+            {"bus_stop",       BUS_STOP},
+            {"construction",   CONSTRUCTION},
+            {"corridor",       CORRIDOR},
+            {"cycleway",       CYCLEWAY},
+            {"elevator",       ELEVATOR},
+            {"footway",        FOOTWAY},
+            {"living_street",  LIVING_STREET},
+            {"motorway",       MOTORWAY},
+            {"path",           PATH},
+            {"pedestrian",     PEDESTRIAN},
+            {"platform",       PLATFORM},
+            {"primary",        PRIMARY},
+            {"primary_link",   PRIMARY_LINK},
+            {"proposed",       PROPOSED},
+            {"raceway",        RACEWAY},
+            {"residential",    RESIDENTIAL},
+            {"rest_area",      REST_AREA},
+            {"road",           ROAD},
+            {"secondary",      SECONDARY},
+            {"secondary_link", SECONDARY_LINK},
+            {"service",        SERVICE},
+            {"steps",          STEPS},
+            {"street_lamp",    STREET_LAMP},
+            {"tertiary",       TERTIARY},
+            {"tertiary_link",  TERTIARY_LINK},
+            {"track",          TRACK},
+            {"trunk",          TRUNK},
+            {"trunk_link",     TRUNK_LINK},
+            {"unclassified",   UNCLASSIFIED},
+            {"via_ferrata",    VIA_FERRATA},
+            {"",               UNDEFINED_PATH}
+    };
 
 public:
 
@@ -183,9 +183,14 @@ private:
 
 public:
     Request(DataBase &database, const std::string &query);
+
     int step();
+
     void data(unsigned long long int &ret, int col_id);
+
     void data(double &ret, int col_id);
+
     void data(std::string &ret, int col_id);
+
     ~Request();
 };
