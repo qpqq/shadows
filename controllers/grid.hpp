@@ -62,7 +62,7 @@ public:
 
     void plot(iPnt p);
 
-    void plotPnts(const std::vector<iPnt>& points);
+    void plotPnts(const std::vector<iPnt> &points);
 
     std::vector<iPnt> pntsUnderLineLow(iPnt p1, iPnt p2);
 

@@ -42,8 +42,8 @@ void Grid::plot(iPnt p) {
     grid[n_y - 1 - p.y][p.x] = p.color;
 }
 
-void Grid::plotPnts(const std::vector<iPnt>& points) {
-    for (auto p : points)
+void Grid::plotPnts(const std::vector<iPnt> &points) {
+    for (auto p: points)
         plot(p);
 }
 
@@ -203,7 +203,7 @@ double Grid::shadowPerc(iPnt p1, iPnt p2) {
     auto points = pntsUnderLine(p1, p2);
 
     int shadowPoints = 0;
-    for (auto p : points) {
+    for (auto p: points) {
         if (getColor(p) == 1)
             shadowPoints += 1;
     }
