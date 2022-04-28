@@ -32,7 +32,7 @@ DataBase::DataBase() = default;
 DataBase::DataBase(const std::string &path) {
     int flag;
     this->path = path.c_str();
-    std::cout << "Opening " + path + " ";
+    std::cout << "Opening " << path << std::endl;
     flag = sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, nullptr);
 
     if (flag != SQLITE_OK) {
@@ -40,7 +40,7 @@ DataBase::DataBase(const std::string &path) {
         std::cerr << "response: " << sqlite3_errmsg(db) << std::endl;
         assert(flag == SQLITE_OK);
     } else {
-        std::cout << "done" << std::endl;
+        std::cout << "Opening " << path << " done" << std::endl;
     }
 }
 
@@ -325,7 +325,7 @@ Request::Request(DataBase &database, const std::string &query) {
 
     if (flag != SQLITE_OK) {
         std::cerr << "Request.sqlite3_prepare_v2 failed: errcode = " << flag << std::endl;
-        std::cerr << "response: " << sqlite3_errmsg(db) << std::endl;
+        std::cerr << "Response: " << sqlite3_errmsg(db) << std::endl;
         assert(flag == SQLITE_OK);
     }
 }

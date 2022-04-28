@@ -28,8 +28,6 @@ add_executable(${PROJECT_NAME}
         main.cpp
         controllers/graph.hpp
         controllers/graph.cpp
-#        controllers/structure.hpp
-#        controllers/structure.cpp
         controllers/database.hpp
         controllers/database.cpp
         controllers/grid.hpp
@@ -38,7 +36,6 @@ add_executable(${PROJECT_NAME}
         sqlite/sqlite3.h
         sqlite/sqlite3.c
         controllers/path.cpp
-#        controllers/path.hpp
         )
 
 target_compile_options(${PROJECT_NAME} PRIVATE -O3)
@@ -54,6 +51,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE drogon)
 #target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 
 # ##############################################################################
+
+target_compile_options(drogon PRIVATE -DCMAKE_BUILD_TYPE=Release)
 
 if (CMAKE_CXX_STANDARD LESS 17)
     # With C++14, use boost to support any, string_view and filesystem
