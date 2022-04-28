@@ -17,9 +17,10 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
 
         DataBase db("../controllers/shadow.db");
         Graph city;
-        city.database = db;
-        auto route = city.getRoute(db.closestNode(fromLocation[0], fromLocation[1]),
-                                   db.closestNode(toLocation[0], toLocation[1]));
+        auto route = city.getRoute(
+                db,
+                db.closestNode(fromLocation[0], fromLocation[1]),
+                db.closestNode(toLocation[0], toLocation[1]));
 
         double routeCoords[2][2] = {
                 {

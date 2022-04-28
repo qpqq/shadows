@@ -3,52 +3,50 @@
 
 Graph::Graph() = default;
 
-Graph::Graph(const std::string &path) : Graph() {
-    database = DataBase(path);
-};
-
 Graph::~Graph() = default;
 
-Graph::graphNode Graph::getNode(uint64_t Node) {
-    return Nodes[Node];
+graphNode Graph::getNode(DataBase &db, uint64_t Node) {
+    return db.getNode(Node);
 }
 
-double Graph::getShading(Graph::graphNode Node1, Graph::graphNode Node2) {
+double Graph::getShading(graphNode Node1, graphNode Node2) {
     return getLength2(Node1, Node2);
 }
 
-Graph::graphShadingEdge Graph::getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2) {
+graphShadingEdge Graph::getShadingEdge(DataBase &db, uint64_t fineness, uint64_t Node1, uint64_t Node2) {
     graphShadingEdge gse = {1,
-                            getShading(getNode(Node1), getNode(Node2)),
-                            getLength2(getNode(Node1), getNode(Node2)),
+                            getShading(getNode(db, Node1), getNode(db, Node2)),
+                            getLength2(getNode(db, Node1), getNode(db, Node2)),
                             Node1,
                             Node2};
     return gse;
 }
 
-std::vector<Graph::weightNode> Graph::getAdjacencyMatrix(uint64_t Node) {
-    return {};
+std::vector<weightNode> Graph::getAdjacencyMatrix(DataBase &db, uint64_t Node) {
+    return db.getAdjacencyMatrix(Node);
 }
 
-double Graph::getLength2(Graph::graphNode Node1, Graph::graphNode Node2) {
+double Graph::getLength2(graphNode Node1, graphNode Node2) {
     return 111200 * acos(sin(Node1.x) * sin(Node2.x) + cos(Node1.x) * cos(Node2.x) * cos(Node2.x - Node2.y));
 }
 
-double Graph::getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
+double
+Graph::getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
     // -O(exp(x^2))
-    return std::min(std::exp(getLength2(getNode(startNode), getNode(EdgeNode)) / fineness),
-                    std::exp(getLength2(getNode(endNode), getNode(EdgeNode))) / fineness);
+    return std::min(std::exp(getLength2(getNode(db, startNode), getNode(db, EdgeNode)) / fineness),
+                    std::exp(getLength2(getNode(db, endNode), getNode(db, EdgeNode))) / fineness);
 }
 
-double Graph::getEdgeWeight(double shading, double length, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
-    return shading + 0.1 * length + getRemotenessWeight(startNode, endNode, EdgeNode, fineness);
+double Graph::getEdgeWeight(DataBase &db, double shading, double length, uint64_t startNode, uint64_t endNode,
+                            uint64_t EdgeNode, double fineness) {
+    return shading + 0.1 * length + getRemotenessWeight(db, startNode, endNode, EdgeNode, fineness);
 }
 
-Graph::graphRoute Graph::getRoute(uint64_t startNode, uint64_t endNode) {
+graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
     minimumsSet minSet;
     usedSet usedSet;
     valueSet valueSet;
-    Graph::graphRoute ans;
+    graphRoute ans;
     bool getans = false;
     minSet.update(startNode, 0, 0, 0);
     valueSet.update(startNode, 0, 0, 0);
@@ -61,15 +59,15 @@ Graph::graphRoute Graph::getRoute(uint64_t startNode, uint64_t endNode) {
             ans.shading = el.value;
             while (node != startNode) {
                 valueSet::valueSetElement route_el = valueSet.get(node);
-                ans.Nodes.push_back(getNode(route_el.nodeIndex));
+                ans.Nodes.push_back(getNode(db, route_el.nodeIndex));
                 node = route_el.prevNodeIndex;
             }
             break;
         }
-        for (auto &e: getAdjacencyMatrix(el.nodeIndex)) {
-            Graph::graphShadingEdge curEdge = getShadingEdge(e.fineness, el.nodeIndex, e.index);
+        for (auto &e: getAdjacencyMatrix(db, el.nodeIndex)) {
+            graphShadingEdge curEdge = getShadingEdge(db, e.fineness, el.nodeIndex, e.index);
             double new_length = el.key +
-                                getEdgeWeight(curEdge.shading, curEdge.length, startNode, endNode, curEdge.node,
+                                getEdgeWeight(db, curEdge.shading, curEdge.length, startNode, endNode, curEdge.node,
                                               trans_finesness[curEdge.fineness]);
             double new_shading = el.value + curEdge.shading;
             if (usedSet.get(curEdge.node) == 0 &&

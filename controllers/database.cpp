@@ -152,6 +152,120 @@ void DataBase::buildings_receive_test() {
     }
 }
 
+void DataBase::neighbours_receive(const std::string &node_id, std::vector<mate> &mates) {
+
+    std::string query, withas, mid_select, query_tag;
+    std::vector<std::string> ways;
+    std::string mid_way;
+    unsigned int i;
+    mate mid_mate;
+
+    query = "SELECT way_id FROM ways WHERE node_id = " + node_id + ";";
+
+    Request req_ways(*this, query);
+
+    while (req_ways.step() != SQLITE_DONE) {
+        req_ways.data(mid_way, 0);
+        ways.push_back(mid_way);
+    }
+
+    for (i = 0; i < ways.size(); ++i) {
+        mid_mate.prev = 0;
+        mid_mate.next = 0;
+        mid_mate.path_type = "";
+
+        withas = "WITH mid AS ( "
+                 "SELECT node_id, "
+                 "LAG(node_id, 1, 0) OVER (ORDER BY seq_id) pv, "
+                 "LEAD(node_id, 1, 0) OVER (ORDER BY seq_id) nt "
+                 "FROM ways "
+                 "WHERE way_id = " + ways[i] + ") ";
+
+        mid_select = "SELECT pv, nt "
+                     "FROM mid "
+                     "WHERE node_id = " + node_id + ";";
+
+        query = withas + mid_select;
+
+        query_tag = "SELECT tag_val "
+                    "FROM way_tags "
+                    "WHERE tag_key = 'highway' AND way_id = " + ways[i] + ";";
+
+        Request req_tag(*this, query_tag);
+        Request req_neighbour(*this, query);
+
+        while (req_tag.step() != SQLITE_DONE) {
+            req_tag.data(mid_mate.path_type, 0);
+        }
+
+        while (req_neighbour.step() != SQLITE_DONE) {
+            req_neighbour.data(mid_mate.prev, 0);
+            req_neighbour.data(mid_mate.next, 1);
+            mates.push_back(mid_mate);
+        }
+    }
+}
+
+int DataBase::define_fine(const std::string &path_type) {
+    if (price_list.count(path_type) > 0) {
+        return price_list[path_type];
+    }
+    return 0;
+}
+
+std::vector<weightNode> DataBase::getAdjacencyMatrix(uint64_t Node) {
+
+    std::vector<weightNode> nodes;
+    std::string node_id = std::to_string(Node);
+    std::vector<mate> mates;
+    weightNode mid_node{};
+    int i, fine;
+
+    neighbours_receive(node_id, mates);
+
+    for (i = 0; i < mates.size(); ++i) {
+        fine = define_fine(mates[i].path_type);
+        if (mates[i].prev != 0) {
+            mid_node.index = mates[i].prev;
+            mid_node.fineness = fine;
+            nodes.push_back(mid_node);
+        }
+        if (mates[i].next != 0) {
+            mid_node.index = mates[i].next;
+            mid_node.fineness = fine;
+            nodes.push_back(mid_node);
+        }
+    }
+    return nodes;
+}
+
+void DataBase::node_coord(const std::string &node_id, node &ret) {
+
+    std::string query;
+    node mid_node;
+
+    query = "SELECT nodes.lat, nodes.lon "
+            "FROM nodes "
+            "WHERE node_id = " + node_id + ";";
+
+    Request req_node(*this, query);
+
+    while (req_node.step() != SQLITE_DONE) {
+        req_node.data(ret.lat, 0);
+        req_node.data(ret.lon, 1);
+    }
+}
+
+graphNode DataBase::getNode(uint64_t Node) {
+    std::string node_id = std::to_string(Node);
+    graphNode gr_node{};
+    node mid_node;
+    node_coord(node_id, mid_node);
+    gr_node.x = mid_node.lat;
+    gr_node.y = mid_node.lon;
+    return gr_node;
+}
+
 unsigned long long int DataBase::closestNode(const std::string &lat, const std::string &lon) {
     std::string query, sq, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
     double radius = 0.0003125; // 0.125 km
