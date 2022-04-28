@@ -13,6 +13,7 @@
 struct iPnt {
     int x;
     int y;
+    double color;
 };
 
 /**
@@ -49,7 +50,7 @@ private:
 
     double elev = 1, azim = 120;
 
-    std::vector<std::vector<int>> grid;
+    std::vector<std::vector<double>> grid;
 
 public:
 
@@ -57,17 +58,23 @@ public:
 
     Grid(std::vector<way> &ArrOfWays, double gridStep);
 
-    void plot(iPnt p, int value);
+    double getColor(iPnt p);
 
-    std::vector<iPnt> plotLineLow(iPnt p1, iPnt p2);
+    void plot(iPnt p);
 
-    std::vector<iPnt> plotLineHigh(iPnt p1, iPnt p2);
+    void plotPnts(const std::vector<iPnt>& points);
 
-    std::vector<iPnt> plotLine(iPnt p1, iPnt p2);
+    std::vector<iPnt> pntsUnderLineLow(iPnt p1, iPnt p2);
+
+    std::vector<iPnt> pntsUnderLineHigh(iPnt p1, iPnt p2);
+
+    std::vector<iPnt> pntsUnderLine(iPnt p1, iPnt p2);
 
     void _fillIn(int start_ind, int final_ind);
 
     void fillIn(int numberOfThreads = -1);
+
+    double shadowPerc(iPnt p1, iPnt p2);
 
     [[maybe_unused]] void print_grid();
 };
