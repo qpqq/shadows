@@ -320,6 +320,19 @@ unsigned long long int DataBase::closestNode(const std::string &lat, const std::
 std::map<unsigned long long int, std::vector<unsigned long long int>>
 DataBase::getAdjacencyMatrixFull(std::string &lat_low, std::string &lon_left,
                                  std::string &lat_up, std::string &lon_right) {
+    "SELECT ways.node_id,\n"
+    "       LAG(ways.node_id, 1, 0) OVER (ORDER BY seq_id)  pv,\n"
+    "       LEAD(ways.node_id, 1, 0) OVER (ORDER BY seq_id) nt\n"
+    "FROM ways\n"
+    "         JOIN nodes ON ways.node_id = nodes.node_id\n"
+    "         JOIN way_tags ON way_tags.way_id = ways.way_id\n"
+    "WHERE lat BETWEEN 55.7852698 - 0.7 AND 55.7852698 + 0.7\n"
+    "    AND lon BETWEEN 37.6491053 - 0.7 AND 37.6491053 + 0.7\n"
+    "    AND way_tags.tag_key = 'highway'\n"
+    "   OR way_tags.tag_key = 'bridge'\n"
+    "LIMIT 1000;\n"
+    "\n"
+    "-- 26999678|55.7852698|37.6491053";
     return {};
 }
 
