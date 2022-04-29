@@ -14,9 +14,9 @@ class Graph {
 
 public:
 
-    std::vector<graphShadingEdge> Edges;
-    std::vector<graphNode> Nodes;
-    std::vector<std::vector<weightNode>> adjacencyMatrix;
+    std::vector<graphShadingEdge> edges;
+    std::vector<graphNode> nodes;
+    std::map<uint64_t, std::vector<uint64_t>> adjacencyMatrix;
 
     /**
     * Default constructor
@@ -31,14 +31,14 @@ public:
 
     graphShadingEdge getShadingEdge(DataBase &db, uint64_t fineness, uint64_t Node1, uint64_t Node2);
 
-    std::vector<weightNode> getAdjacencyMatrix(DataBase &db, uint64_t Node); // -map
+    std::vector<weightNode> getAdjacencyMatrix(uint64_t Node); // -map
 
     double getLength2(graphNode Node1, graphNode Node2);
 
     double getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
 
-    double getEdgeWeight(DataBase &db, double shading, double length, uint64_t startNode, uint64_t endNode,
-                         uint64_t EdgeNode, double fineness);
+    double getEdgeWeight(DataBase &db, double shading, double length,
+                         uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
 
     graphRoute getRoute(DataBase &db, uint64_t startNode, uint64_t endNode); // -output
 };

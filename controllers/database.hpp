@@ -63,6 +63,12 @@ struct mate {
     std::string path_type;      // way_tag for classifying roads
 };
 
+struct mate_matrix {
+    unsigned long long int      id;
+    unsigned long long int      prev;           // previous node in the array
+    unsigned long long int      next;           // next node in the array
+};
+
 struct graphShadingEdge {
     uint64_t fineness; // Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
     double shading; // Затененность дороги выраженная в длине незатененной части
@@ -168,8 +174,8 @@ public:
 
     std::vector<weightNode> getAdjacencyMatrix(uint64_t Node);
 
-    std::map<unsigned long long int, std::vector<unsigned long long int>>
-    getAdjacencyMatrixFull(std::string &lat_low, std::string &lon_left, std::string &lat_up, std::string &lon_right);
+    std::map<uint64_t, std::vector<uint64_t>>
+    getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode);
 
     void node_coord(const std::string &node_id, node &ret);
 
