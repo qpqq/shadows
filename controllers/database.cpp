@@ -319,20 +319,84 @@ unsigned long long int DataBase::closestNode(const std::string &lat, const std::
 
 std::map<uint64_t, std::vector<uint64_t>>
 DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
-    "SELECT ways.node_id,\n"
-    "       LAG(ways.node_id, 1, 0) OVER (ORDER BY seq_id)  pv,\n"
-    "       LEAD(ways.node_id, 1, 0) OVER (ORDER BY seq_id) nt\n"
-    "FROM ways\n"
-    "         JOIN nodes ON ways.node_id = nodes.node_id\n"
-    "         JOIN way_tags ON way_tags.way_id = ways.way_id\n"
-    "WHERE lat BETWEEN 55.7852698 - 0.7 AND 55.7852698 + 0.7\n"
-    "    AND lon BETWEEN 37.6491053 - 0.7 AND 37.6491053 + 0.7\n"
-    "    AND way_tags.tag_key = 'highway'\n"
-    "   OR way_tags.tag_key = 'bridge'\n"
-    "LIMIT 1000;\n"
-    "\n"
-    "-- 26999678|55.7852698|37.6491053";
-    return {};
+    
+    std::map<uint64_t, std::vector<uint64_t>> dict;
+    std::string query_matrix, between, query_nodes;
+    std::string start_node, end_node, lat_low, lat_up, lon_left, lon_right;
+    unsigned long long int lat1, lat2, lon1, lon2, delta;
+    mate_matrix mid_mate;
+    node mid_node;
+
+    delta = 0.000625;
+
+    start_node = std::to_string(startNode);
+    end_node =   std::to_string(endNode);
+
+    query_nodes = "SELECT node_id, lat, lon "
+                  "FROM nodes "
+                  "WHERE node_id = " + start_node + ";";
+
+    Request req1_nodes(*this, query_nodes);
+
+    while (req1_nodes.step() != SQLITE_DONE) {
+        req1_nodes.data(mid_node.id, 0);
+        req1_nodes.data(mid_node.lat, 1);
+        req1_nodes.data(mid_node.lon, 2);
+    }
+
+    lat1 = mid_node.lat;
+    lon1 = mid_node.lon;
+
+    query_nodes = "SELECT node_id, lat, lon "
+                  "FROM nodes "
+                  "WHERE node_id = " + end_node + ";";
+
+    Request req2_nodes(*this, query_nodes);
+
+    while (req2_nodes.step() != SQLITE_DONE) {
+        req2_nodes.data(mid_node.id, 0);
+        req2_nodes.data(mid_node.lat, 1);
+        req2_nodes.data(mid_node.lon, 2);
+    }
+
+    lat2 = mid_node.lat;
+    lon2 = mid_node.lon;
+
+    lat_low   = std::to_string(std::min(lat1, lat2) + delta);
+    lat_up    = std::to_string(std::max(lat1, lat2) + delta);
+    lon_left  = std::to_string(std::min(lon1, lon2) + delta);
+    lon_right = std::to_string(std::max(lon1, lon2) + delta);
+
+
+    between = "lat BETWEEN " + lat_low + " AND " + lat_up + " AND lon BETWEEN " + lon_left + " AND " + lon_right + " ";
+
+    query_matrix = "SELECT ways.node_id, "
+            "LAG(ways.node_id, 1, 0) OVER (ORDER BY seq_id)  pv, "
+            "LEAD(ways.node_id, 1, 0) OVER (ORDER BY seq_id) nt " 
+            "FROM ways "
+            "JOIN nodes ON ways.node_id = nodes.node_id "
+            "JOIN way_tags ON way_tags.way_id = ways.way_id "
+            "WHERE " + between + 
+            "AND way_tags.tag_key = 'highway' "
+            "OR way_tags.tag_key = 'bridge';";
+
+    Request req_matrix(*this, query_matrix);
+
+    while (req_matrix.step() != SQLITE_DONE) {
+        req_matrix.data(mid_mate.id, 0);
+        req_matrix.data(mid_mate.prev, 1);
+        req_matrix.data(mid_mate.next, 2);
+
+        if (mid_mate.prev != 0) {
+            dict[mid_mate.id].push_back(mid_mate.prev);
+        }
+
+        if (mid_mate.next != 0) {
+            dict[mid_mate.id].push_back(mid_mate.next);
+        }
+        
+    }
+    return dict;
 }
 
 Request::Request(DataBase &database, const std::string &query) {

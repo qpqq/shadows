@@ -63,6 +63,12 @@ struct mate {
     std::string path_type;      // way_tag for classifying roads
 };
 
+struct mate_matrix {
+    unsigned long long int      id;
+    unsigned long long int      prev;           // previous node in the array
+    unsigned long long int      next;           // next node in the array
+};
+
 struct graphShadingEdge {
     uint64_t fineness; // Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
     double shading; // Затененность дороги выраженная в длине незатененной части
