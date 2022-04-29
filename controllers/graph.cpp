@@ -27,20 +27,20 @@ std::vector<weightNode> Graph::getAdjacencyMatrix(DataBase &db, uint64_t Node) {
 }
 
 double Graph::getLength2(graphNode Node1, graphNode Node2) {
-    return 111200 * acos(sin(Node1.x) * sin(Node2.x) + cos(Node1.x) * cos(Node2.x) * cos(Node2.x - Node2.y));
+    return 111.2 * acos(sin((Node1.x * M_PI)/180 ) * sin((Node2.x * M_PI) / 180) + cos((Node1.x * M_PI) / 180) * cos((Node2.x * M_PI) / 180) * cos((Node2.x * M_PI) / 180 - (Node2.y * M_PI) / 180));
 }
 
 double
 Graph::getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
     // -O(exp(x^2))
-	double ans = std::min(std::exp(_graph.getLength2(_graph.getNode(startNode), _graph.getNode(EdgeNode)) / fineness), std::exp(_graph.getLength2(_graph.getNode(endNode), _graph.getNode(EdgeNode))) / fineness);
+	double ans = std::min(std::exp(getLength2(getNode(db, startNode), getNode(db, EdgeNode)) / fineness), std::exp(getLength2(getNode(db, endNode), getNode(db, EdgeNode))) / fineness);
 	//return std::min(ans, 100.0);
 	return 1.0;
 }
 
 double Graph::getEdgeWeight(DataBase &db, double shading, double length, uint64_t startNode, uint64_t endNode,
                             uint64_t EdgeNode, double fineness) {
-    return (shading + 0.1 * length )*getRemotennesWeight(_graph, startNode, endNode, EdgeNode, fineness);
+    return (shading + 0.1 * length )*getRemotenessWeight(db, startNode, endNode, EdgeNode, fineness);
 }
 
 
@@ -56,7 +56,7 @@ graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
 	int cnt = 0;
     while (minSet.is_empty() == 0) {
         minimumsSet::minimumsSetElement el = minSet.getMinimum();
-	std::cout << el.nodeIndex << " node cnt:" << cnt << std::endl;
+	std::cout << el.nodeIndex << " node cnt:" << cnt << " length: "<< el.key <<std::endl;
         if (el.nodeIndex == endNode) {
             getans = true;
             uint64_t node = endNode;
