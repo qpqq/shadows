@@ -362,9 +362,9 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
     lat2 = mid_node.lat;
     lon2 = mid_node.lon;
 
-    lat_low   = std::to_string(std::min(lat1, lat2) + delta);
+    lat_low   = std::to_string(std::min(lat1, lat2) - delta);
     lat_up    = std::to_string(std::max(lat1, lat2) + delta);
-    lon_left  = std::to_string(std::min(lon1, lon2) + delta);
+    lon_left  = std::to_string(std::min(lon1, lon2) - delta);
     lon_right = std::to_string(std::max(lon1, lon2) + delta);
 
 
