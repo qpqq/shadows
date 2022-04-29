@@ -27,7 +27,7 @@ std::vector<weightNode> Graph::getAdjacencyMatrix(DataBase &db, uint64_t Node) {
 }
 
 double Graph::getLength2(graphNode Node1, graphNode Node2) {
-    return 111200 * acos(sin(Node1.x) * sin(Node2.x) + cos(Node1.x) * cos(Node2.x) * cos(Node2.x - Node2.y));
+    return 111.2 * acos(sin((Node1.x * M_PI)/180 ) * sin((Node2.x * M_PI) / 180) + cos((Node1.x * M_PI) / 180) * cos((Node2.x * M_PI) / 180) * cos((Node2.x * M_PI) / 180 - (Node2.y * M_PI) / 180));
 }
 
 double
@@ -56,7 +56,7 @@ graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
 	int cnt = 0;
     while (minSet.is_empty() == 0) {
         minimumsSet::minimumsSetElement el = minSet.getMinimum();
-	//std::cout << el.nodeIndex << " node cnt:" << cnt << std::endl;
+	std::cout << el.nodeIndex << " node cnt:" << cnt << " length: "<< el.key <<std::endl;
         if (el.nodeIndex == endNode) {
             getans = true;
             uint64_t node = endNode;
