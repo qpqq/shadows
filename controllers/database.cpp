@@ -317,6 +317,12 @@ unsigned long long int DataBase::closestNode(const std::string &lat, const std::
     return ret.id;
 }
 
+std::map<unsigned long long int, std::vector<unsigned long long int>>
+DataBase::getAdjacencyMatrixFull(std::string &lat_low, std::string &lon_left,
+                                 std::string &lat_up, std::string &lon_right) {
+    return {};
+}
+
 Request::Request(DataBase &database, const std::string &query) {
     int flag;
     sqlite3 *db = database.get_pointer();

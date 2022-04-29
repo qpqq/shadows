@@ -168,6 +168,9 @@ public:
 
     std::vector<weightNode> getAdjacencyMatrix(uint64_t Node);
 
+    std::map<unsigned long long int, std::vector<unsigned long long int>>
+    getAdjacencyMatrixFull(std::string &lat_low, std::string &lon_left, std::string &lat_up, std::string &lon_right);
+
     void node_coord(const std::string &node_id, node &ret);
 
     graphNode getNode(uint64_t Node);
@@ -182,6 +185,7 @@ private:
     sqlite3_stmt *stmt{};
 
 public:
+
     Request(DataBase &database, const std::string &query);
 
     int step();

@@ -39,8 +39,8 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
 
         auto route = city.getRoute(
                 db,
-                db.closestNode(fromLocation[0], fromLocation[1]),
-                db.closestNode(toLocation[0], toLocation[1]));
+                start_node,
+                finish_node);
 
         std::cout << "Making the route from " << start_node << " to " << finish_node << " done" << std::endl;
         std::cout << "Number of vertices: " << route.Nodes.size() << std::endl;
