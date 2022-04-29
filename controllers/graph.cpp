@@ -40,7 +40,7 @@ Graph::getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, u
 
 double Graph::getEdgeWeight(DataBase &db, double shading, double length, uint64_t startNode, uint64_t endNode,
                             uint64_t EdgeNode, double fineness) {
-    return (shading + 0.1 * length )*getRemotennesWeight(db, startNode, endNode, EdgeNode, fineness);
+    return (shading + 0.1 * length )*getRemotenesWeight(db, startNode, endNode, EdgeNode, fineness);
 }
 
 
