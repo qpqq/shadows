@@ -370,13 +370,15 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
 
     between = "lat BETWEEN " + lat_low + " AND " + lat_up + " AND lon BETWEEN " + lon_left + " AND " + lon_right + " ";
 
+    // TODO разорвать два пути вместе
+
     query_matrix = "SELECT ways.node_id, "
-            "LAG(ways.node_id, 1, 0) OVER (ORDER BY seq_id)  pv, "
-            "LEAD(ways.node_id, 1, 0) OVER (ORDER BY seq_id) nt " 
+            "LAG(ways.node_id, 1, 0) OVER (ORDER BY ways.way_id, ways.seq_id)  pv, "
+            "LEAD(ways.node_id, 1, 0) OVER (ORDER BY ways.way_id, ways.seq_id) nt " 
             "FROM ways "
             "JOIN nodes ON ways.node_id = nodes.node_id "
             "JOIN way_tags ON way_tags.way_id = ways.way_id "
-            "WHERE " + between + ";";
+            "WHERE " + between + " " +
             "AND way_tags.tag_key = 'highway' "
             "OR way_tags.tag_key = 'bridge';";
 
