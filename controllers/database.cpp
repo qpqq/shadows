@@ -323,7 +323,7 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
     std::map<uint64_t, std::vector<uint64_t>> dict;
     std::string query_matrix, between, query_nodes;
     std::string start_node, end_node, lat_low, lat_up, lon_left, lon_right;
-    unsigned long long int lat1, lat2, lon1, lon2, delta;
+    double lat1, lat2, lon1, lon2, delta;
     mate_matrix mid_mate;
     node mid_node;
 
@@ -376,7 +376,7 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
             "FROM ways "
             "JOIN nodes ON ways.node_id = nodes.node_id "
             "JOIN way_tags ON way_tags.way_id = ways.way_id "
-            "WHERE " + between + 
+            "WHERE " + between + ";";
             "AND way_tags.tag_key = 'highway' "
             "OR way_tags.tag_key = 'bridge';";
 
