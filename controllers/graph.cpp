@@ -27,7 +27,9 @@ std::vector<weightNode> Graph::getAdjacencyMatrix(DataBase &db, uint64_t Node) {
 }
 
 double Graph::getLength2(graphNode Node1, graphNode Node2) {
-    return 111.2 * acos(sin((Node1.x * M_PI)/180 ) * sin((Node2.x * M_PI) / 180) + cos((Node1.x * M_PI) / 180) * cos((Node2.x * M_PI) / 180) * cos((Node2.x * M_PI) / 180 - (Node2.y * M_PI) / 180));
+    return 111200 * 180 / M_PI * acos(sin((Node1.x * M_PI) / 180) * sin((Node2.x * M_PI) / 180) +
+                                      cos((Node1.x * M_PI) / 180) * cos((Node2.x * M_PI) / 180) *
+                                      cos((Node2.y * M_PI) / 180 - (Node1.y * M_PI) / 180));
 }
 
 double
