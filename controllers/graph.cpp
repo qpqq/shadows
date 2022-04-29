@@ -22,8 +22,13 @@ graphShadingEdge Graph::getShadingEdge(DataBase &db, uint64_t fineness, uint64_t
     return gse;
 }
 
-std::vector<weightNode> Graph::getAdjacencyMatrix(DataBase &db, uint64_t Node) {
-    return db.getAdjacencyMatrix(Node);
+std::vector<weightNode> Graph::getAdjacencyMatrix(uint64_t Node) {
+    std::vector<weightNode> weightNodeArr;
+    for (auto adjacentNode: adjacencyMatrix[Node]) {
+        weightNodeArr.push_back({adjacentNode, 1});
+    }
+
+    return weightNodeArr;
 }
 
 double Graph::getLength2(graphNode Node1, graphNode Node2) {
@@ -40,18 +45,19 @@ Graph::getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, u
 	return 1.0;
 }
 
-double Graph::getEdgeWeight(DataBase &db, double shading, double length, uint64_t startNode, uint64_t endNode,
-                            uint64_t EdgeNode, double fineness) {
-    return (shading + 0.1 * length )*getRemotenessWeight(db, startNode, endNode, EdgeNode, fineness);
+double Graph::getEdgeWeight(DataBase &db, double shading, double length,
+                            uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
+    return (shading + 0.1 * length) * getRemotenessWeight(db, startNode, endNode, EdgeNode, fineness);
 }
 
 
 graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
+    adjacencyMatrix = db.getAdjacencyMatrixFull(startNode, endNode);
+
     minimumsSet minSet;
     usedSet usedSet;
     valueSet valueSet;
     graphRoute ans;
-    bool getans = false;
     minSet.update(startNode, 0, 0, 0);
     valueSet.update(startNode, 0, 0, 0);
     usedSet.update(0, 0);
@@ -60,7 +66,6 @@ graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
         minimumsSet::minimumsSetElement el = minSet.getMinimum();
 	std::cout << el.nodeIndex << " node cnt:" << cnt << " length: "<< el.key <<std::endl;
         if (el.nodeIndex == endNode) {
-            getans = true;
             uint64_t node = endNode;
             ans.shading = el.value;
             while (node != startNode) {
@@ -70,7 +75,7 @@ graphRoute Graph::getRoute(DataBase &db, uint64_t startNode, uint64_t endNode) {
             }
             break;
         }
-        for (auto &e: getAdjacencyMatrix(db, el.nodeIndex)) {
+        for (auto &e: getAdjacencyMatrix(el.nodeIndex)) {
             graphShadingEdge curEdge = getShadingEdge(db, e.fineness, el.nodeIndex, e.index);
             double new_length = el.key +
                                 getEdgeWeight(db, curEdge.shading, curEdge.length, startNode, endNode, curEdge.node,

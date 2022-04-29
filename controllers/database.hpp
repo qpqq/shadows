@@ -168,8 +168,8 @@ public:
 
     std::vector<weightNode> getAdjacencyMatrix(uint64_t Node);
 
-    std::map<unsigned long long int, std::vector<unsigned long long int>>
-    getAdjacencyMatrixFull(std::string &lat_low, std::string &lon_left, std::string &lat_up, std::string &lon_right);
+    std::map<uint64_t, std::vector<uint64_t>>
+    getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode);
 
     void node_coord(const std::string &node_id, node &ret);
 

@@ -317,9 +317,8 @@ unsigned long long int DataBase::closestNode(const std::string &lat, const std::
     return ret.id;
 }
 
-std::map<unsigned long long int, std::vector<unsigned long long int>>
-DataBase::getAdjacencyMatrixFull(std::string &lat_low, std::string &lon_left,
-                                 std::string &lat_up, std::string &lon_right) {
+std::map<uint64_t, std::vector<uint64_t>>
+DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
     "SELECT ways.node_id,\n"
     "       LAG(ways.node_id, 1, 0) OVER (ORDER BY seq_id)  pv,\n"
     "       LEAD(ways.node_id, 1, 0) OVER (ORDER BY seq_id) nt\n"

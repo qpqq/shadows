@@ -32,17 +32,17 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
         DataBase db("../controllers/shadow.db");
         Graph city;
 
-        auto start_node = db.closestNode(fromLocation[0], fromLocation[1]);
-        auto finish_node = db.closestNode(toLocation[0], toLocation[1]);
+        auto startNode = db.closestNode(fromLocation[0], fromLocation[1]);
+        auto endNode = db.closestNode(toLocation[0], toLocation[1]);
 
-        std::cout << "Making the route from " << start_node << " to " << finish_node << std::endl;
+        std::cout << "Making the route from " << startNode << " to " << endNode << std::endl;
 
         auto route = city.getRoute(
                 db,
-                start_node,
-                finish_node);
+                startNode,
+                endNode);
 
-        std::cout << "Making the route from " << start_node << " to " << finish_node << " done" << std::endl;
+        std::cout << "Making the route from " << startNode << " to " << endNode << " done" << std::endl;
         std::cout << "Number of vertices: " << route.Nodes.size() << std::endl;
 
 //        double routeCoords[2][2] = {
