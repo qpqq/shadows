@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(shadows CXX C)
 
+add_compile_options(-lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
+add_definitions(-lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS")
+
 include(CheckIncludeFileCXX)
 
 check_include_file_cxx(any HAS_ANY)
@@ -23,27 +28,31 @@ add_executable(${PROJECT_NAME}
         main.cpp
         controllers/graph.hpp
         controllers/graph.cpp
-        controllers/structure.hpp
-        controllers/structure.cpp
         controllers/database.hpp
         controllers/database.cpp
         controllers/grid.hpp
         controllers/grid.cpp
         controllers/solar.cpp
         sqlite/sqlite3.h
-        sqlite/sqlite3.c)
+        sqlite/sqlite3.c
+        controllers/path.cpp
+        )
+
+target_compile_options(${PROJECT_NAME} PRIVATE -O3)
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
 # to add drogon 
- add_subdirectory(drogon)
- target_link_libraries(${PROJECT_NAME} PRIVATE drogon)
+add_subdirectory(drogon)
+target_link_libraries(${PROJECT_NAME} PRIVATE drogon)
 #
 # and comment out the following lines
 #find_package(Drogon CONFIG REQUIRED)
 #target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
 
 # ##############################################################################
+
+target_compile_options(drogon PRIVATE -DCMAKE_BUILD_TYPE=Release)
 
 if (CMAKE_CXX_STANDARD LESS 17)
     # With C++14, use boost to support any, string_view and filesystem
@@ -55,6 +64,11 @@ elseif (CMAKE_CXX_STANDARD LESS 20)
 else ()
     message(STATUS "use c++20")
 endif ()
+
+#target_compile_options(${PROJECT_NAME}  PRIVATE -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS")
 
 aux_source_directory(controllers CTL_SRC)
 aux_source_directory(filters FILTER_SRC)

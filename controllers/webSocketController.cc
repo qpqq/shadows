@@ -1,5 +1,22 @@
+#include <vector>
+#include <string>
+#include <iomanip>
+
 #include "webSocketController.h"
 #include "graph.hpp"
+
+/**
+ * Converts doubles to string with the specified precision.
+ * @param x double
+ * @param n number of digits after the decimal iPnt
+ * @return string
+ */
+std::string toStringWithPrecision(double x, const int n = 10) {
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << x;
+    return out.str();
+}
 
 void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnPtr, std::string &&message,
                                            const WebSocketMessageType &type) {
@@ -7,44 +24,55 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
     Json::Value recRoot;
     reader.parse(message, recRoot, false);
     if (!recRoot.isNull()) { //Во время завершения сервера посылается пустое сообщение, чтобы не вылетал сервер
-        double fromLocation[2] =
-                {
-                        std::stof(recRoot["fromLocation"][0].asString()), std::stof(
-                        recRoot["fromLocation"][1].asString())}; //from location coords JSON -> cpp array convert
-        double toLocation[2] =
-                {
-                        std::stof(recRoot["toLocation"][0].asString()), std::stof(
-                        recRoot["toLocation"][1].asString())}; //to location coords JSON -> cpp array convert
+        std::vector<std::string> fromLocation = {recRoot["fromLocation"][0].asString(),
+                                                 recRoot["fromLocation"][1].asString()}; //from location coords JSON -> cpp array convert
+        std::vector<std::string> toLocation = {recRoot["toLocation"][0].asString(),
+                                               recRoot["toLocation"][1].asString()}; //to location coords JSON -> cpp array convert
 
-        Graph city{};
-        auto route = city.getRoute(1, 1);
+        DataBase db("../controllers/shadow.db");
+        Graph city;
 
-        double routeCoords[2][2] = {
-                {
-                        std::stof(recRoot["fromLocation"][0].asString()),
-                        std::stof(recRoot["fromLocation"][1].asString())},
-                {
-                        std::stof(recRoot["toLocation"][0].asString()),
-                        std::stof(recRoot["toLocation"][1].asString())}};
+        auto startNode = db.closestNode(fromLocation[0], fromLocation[1]);
+        auto endNode = db.closestNode(toLocation[0], toLocation[1]);
 
-        Json::Value sendRoot; //ПРИМЕР ОТПРАВКИ
-        for (int i = 0; i < 2; i++) { //2 -> route.coords.size()
-//        for (int i = 0; i < route.Nodes.size(); i++) {
-            Json::Value routeCoordN;
-            routeCoordN[0] = routeCoords[i][0]; //routeCoords[i][0] -> route.coords[i].lat
-            routeCoordN[1] = routeCoords[i][1]; //routeCoords[i][1] -> route.coords[i].lon
-//            routeCoordN[0] = route.Nodes[i].x;
-//            routeCoordN[1] = route.Nodes[i].y;
-            sendRoot["routeCoords"][i] = routeCoordN;
-        }
+        std::cout << "Making the route from " << startNode << " to " << endNode << std::endl;
+
+        auto route = city.getRoute(
+                db,
+                startNode,
+                endNode);
+
+        std::cout << "Making the route from " << startNode << " to " << endNode << " done" << std::endl;
+        std::cout << "Number of vertices: " << route.Nodes.size() << std::endl;
+
+//        double routeCoords[2][2] = {
+//                {
+//                        std::stof(recRoot["fromLocation"][0].asString()),
+//                        std::stof(recRoot["fromLocation"][1].asString())},
+//                {
+//                        std::stof(recRoot["toLocation"][0].asString()),
+//                        std::stof(recRoot["toLocation"][1].asString())}};
+
+        Json::Value sendRoot;
+
+        if (!route.Nodes.empty()) {
+//        for (int i = 0; i < 2; i++) { //2 -> route.coords.size()
+            for (int i = 0; i < route.Nodes.size(); i++) {
+                Json::Value routeCoordN;
+//            routeCoordN[0] = routeCoords[i][0]; //routeCoords[i][0] -> route.coords[i].lat
+//            routeCoordN[1] = routeCoords[i][1]; //routeCoords[i][1] -> route.coords[i].lon
+                routeCoordN[0] = toStringWithPrecision(route.Nodes[i].x);
+                routeCoordN[1] = toStringWithPrecision(route.Nodes[i].y);
+                sendRoot["routeCoords"][i] = routeCoordN;
+            }
+        } else
+            sendRoot["routeCoords"] = ' ';
+
         Json::StreamWriterBuilder builder;
         std::string resRouteCoords = Json::writeString(builder, sendRoot);
 
         wsConnPtr->send(resRouteCoords);
-    } else {
-        wsConnPtr->send(message);
     }
-
 }
 
 void webSocketController::handleNewConnection(const HttpRequestPtr &req, const WebSocketConnectionPtr &wsConnPtr) {

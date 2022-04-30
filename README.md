@@ -37,7 +37,7 @@ git submodule update --init --recursive
 ```bash
 cd build
 cmake ..
-make
+cmake --build . -j 8
 sudo ./shadows
 ```
 

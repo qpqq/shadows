@@ -5,48 +5,40 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <stdio.h>
+#include <cstdio>
+#include <cmath>
 
-#include "sqlite/sqlite3.h"
 #include "database.hpp"
 
-struct Graph {
-    struct graphShadingEdge {
-        uint64_t fineness; // Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
-        double shading; // Затененность дороги выраженная в длине незатененной части
-        double length; // Длина дороги
-        uint64_t node; // Вершина конца ребра
-        uint64_t prevNode; // Вершина начала ребра
-    };
+class Graph {
 
-    struct graphNode {
-        double x;
-        double y;
-    };
-    struct graphRoute {
-        std::vector<graphNode> Nodes;
-        double shading;
-    };
-    struct weightNode {
-        uint64_t index;
-        int fineness;
-    };
+public:
 
-    static DataBase database;
+    std::vector<graphShadingEdge> edges;
+    std::vector<graphNode> nodes;
+    std::map<uint64_t, std::vector<uint64_t>> adjacencyMatrix;
 
-    std::vector<graphShadingEdge> Edges;
-    std::vector<graphNode> Nodes;
-    std::vector<std::vector<weightNode>> adjacencyMatrix;
-
-    graphShadingEdge getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2);
-
-    graphNode getNode(uint64_t Node); // --map
-    double getShading(graphNode Node1, graphNode Node2); // -shading в метрах
-    graphRoute getRoute(uint64_t startNode, uint64_t endNode); // ---output
-    std::vector<weightNode> getAdjacencyMatrix(uint64_t Node); // -map
-    double getLength2(graphNode Node1, graphNode Node2);
-
+    /**
+    * Default constructor
+    */
     Graph();
 
     ~Graph();
+
+    graphNode getNode(DataBase &db, uint64_t Node); // -map
+
+    double getShading(graphNode Node1, graphNode Node2); // -shading в метрах
+
+    graphShadingEdge getShadingEdge(DataBase &db, uint64_t fineness, uint64_t Node1, uint64_t Node2);
+
+    std::vector<weightNode> getAdjacencyMatrix(uint64_t Node); // -map
+
+    double getLength2(graphNode Node1, graphNode Node2);
+
+    double getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
+
+    double getEdgeWeight(DataBase &db, double shading, double length,
+                         uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
+
+    graphRoute getRoute(DataBase &db, uint64_t startNode, uint64_t endNode); // -output
 };

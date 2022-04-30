@@ -29,16 +29,25 @@ Grid::Grid(std::vector<way> &ArrOfWays, double gridStep) : waysArr{ArrOfWays}, s
     dlon = (max_lon - min_lon) / n_lon;
 
     for (int i = 0; i < n_y; i++) {
-        std::vector<int> temp(n_x, 0);
+        std::vector<double> temp(n_x, 0);
         grid.push_back(temp);
     }
 }
 
-void Grid::plot(iPnt p, int value) {
-    grid[n_y - 1 - p.y][p.x] = value;
+double Grid::getColor(iPnt p) {
+    return grid[n_y - 1 - p.y][p.x];
 }
 
-std::vector<iPnt> Grid::plotLineLow(iPnt p1, iPnt p2) {
+void Grid::plot(iPnt p) {
+    grid[n_y - 1 - p.y][p.x] = p.color;
+}
+
+void Grid::plotPnts(const std::vector<iPnt> &points) {
+    for (auto p: points)
+        plot(p);
+}
+
+std::vector<iPnt> Grid::pntsUnderLineLow(iPnt p1, iPnt p2) {
     int dx = abs(p1.x - p2.x);
     int dy = abs(p1.y - p2.y);
     int error = 0;
@@ -54,8 +63,7 @@ std::vector<iPnt> Grid::plotLineLow(iPnt p1, iPnt p2) {
 
     int y = p1.y;
     for (int x = p1.x; x <= p2.x; x++) {
-        plot({x, y}, 1);
-        marked.push_back({x, y});
+        marked.push_back({x, y, 1});
 
         error += slope;
 
@@ -68,7 +76,7 @@ std::vector<iPnt> Grid::plotLineLow(iPnt p1, iPnt p2) {
     return marked;
 }
 
-std::vector<iPnt> Grid::plotLineHigh(iPnt p1, iPnt p2) {
+std::vector<iPnt> Grid::pntsUnderLineHigh(iPnt p1, iPnt p2) {
     int dx = abs(p1.x - p2.x);
     int dy = abs(p1.y - p2.y);
     int error = 0;
@@ -84,8 +92,7 @@ std::vector<iPnt> Grid::plotLineHigh(iPnt p1, iPnt p2) {
 
     int x = p1.x;
     for (int y = p1.y; y <= p2.y; y++) {
-        plot({x, y}, 1);
-        marked.push_back({x, y});
+        marked.push_back({x, y, 1});
 
         error += slope;
 
@@ -98,14 +105,13 @@ std::vector<iPnt> Grid::plotLineHigh(iPnt p1, iPnt p2) {
     return marked;
 }
 
-std::vector<iPnt> Grid::plotLine(iPnt p1, iPnt p2) {
+std::vector<iPnt> Grid::pntsUnderLine(iPnt p1, iPnt p2) {
     if (p1.x == p2.x) {
         std::vector<iPnt> marked;
 
         int x = p1.x;
         for (int y = std::min(p1.y, p2.y); y <= std::max(p1.y, p2.y); y++) {
-            plot({x, y}, 1);
-            marked.push_back({x, y});
+            marked.push_back({x, y, 1});
         }
 
         return marked;
@@ -113,15 +119,15 @@ std::vector<iPnt> Grid::plotLine(iPnt p1, iPnt p2) {
 
     if (abs(p1.x - p2.x) >= abs(p1.y - p2.y)) {
         if (p1.x > p2.x)
-            return plotLineLow(p2, p1);
+            return pntsUnderLineLow(p2, p1);
 
-        return plotLineLow(p1, p2);
+        return pntsUnderLineLow(p1, p2);
     }
 
     if (p1.y > p2.y)
-        return plotLineHigh(p2, p1);
+        return pntsUnderLineHigh(p2, p1);
 
-    return plotLineHigh(p1, p2);
+    return pntsUnderLineHigh(p1, p2);
 }
 
 void Grid::_fillIn(int start_ind, int final_ind) {
@@ -152,7 +158,8 @@ void Grid::_fillIn(int start_ind, int final_ind) {
             y2 = std::min(y2, n_y - 1);
             x2 = std::min(x2, n_x - 1);
 
-            auto marked = plotLine({x1, y1}, {x2, y2});
+            auto marked = pntsUnderLine({x1, y1}, {x2, y2});
+            plotPnts(marked);
 
             for (auto p: marked) {
                 int x_new = p.x + dx_shadow;
@@ -162,7 +169,7 @@ void Grid::_fillIn(int start_ind, int final_ind) {
                 y_new = std::max(0, y_new);
                 y_new = std::min(y_new, n_lat - 1);
 
-                plotLine(p, {x_new, y_new});
+                plotPnts(pntsUnderLine(p, {x_new, y_new}));
             }
         }
     }
@@ -191,6 +198,19 @@ void Grid::fillIn(int numberOfThreads) {
         t.join();
     }
 }
+
+double Grid::shadowPerc(iPnt p1, iPnt p2) {
+    auto points = pntsUnderLine(p1, p2);
+
+    int shadowPoints = 0;
+    for (auto p: points) {
+        if (getColor(p) == 1)
+            shadowPoints += 1;
+    }
+
+    return shadowPoints / (double) points.size();
+}
+
 
 [[maybe_unused]] void Grid::print_grid() {
     for (auto &row: grid) {
