@@ -7,6 +7,7 @@
 #include <map>
 #include <cstdio>
 #include <cassert>
+#include <algorithm>
 
 #include "sqlite/sqlite3.h"
 

@@ -390,7 +390,7 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
 
     // TODO разорвать два пути вместе
 
-    query_matrix = "SELECT node_id, pv, nt "
+    query_matrix = "SELECT node_id, prev, next "
                    "FROM adjacency "
                    "WHERE " + between + ";";
 
@@ -402,11 +402,15 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
         req_matrix.data(mid_mate.next, 2);
 
         if (mid_mate.prev != 0) {
-            dict[mid_mate.id].push_back(mid_mate.prev);
+            if (std::find(begin(dict[mid_mate.id]), end(dict[mid_mate.id]), mid_mate.prev) == std::end(dict[mid_mate.id])) {
+                dict[mid_mate.id].push_back(mid_mate.prev);
+            }
         }
 
         if (mid_mate.next != 0) {
-            dict[mid_mate.id].push_back(mid_mate.next);
+            if (std::find(begin(dict[mid_mate.id]), end(dict[mid_mate.id]), mid_mate.next) == std::end(dict[mid_mate.id])) {
+                dict[mid_mate.id].push_back(mid_mate.next);
+            }
         }
 
     }
