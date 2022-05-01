@@ -32,7 +32,10 @@ DataBase::DataBase() = default;
 DataBase::DataBase(const std::string &path) {
     int flag;
     this->path = path.c_str();
+
     std::cout << "Opening " << path << "... ";
+    std::cout.flush();
+
     flag = sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, nullptr);
 
     if (flag != SQLITE_OK) {
@@ -56,14 +59,31 @@ DataBase::~DataBase() {
     sqlite3_close(db);
 }
 
-std::vector<way>
-DataBase::buildings_receive(std::string &lat_low, std::string &lon_left, std::string &lat_up, std::string &lon_right) {
-    std::vector<way> build;
+std::vector<Way>
+DataBase::buildings_receive(std::vector<std::string> &coords1, std::vector<std::string> &coords2) {
+    double lat1, lon1, lat2, lon2;
+    lat1 = std::stod(coords1[0]);
+    lon1 = std::stod(coords1[1]);
+    lat2 = std::stod(coords2[0]);
+    lon2 = std::stod(coords2[1]);
+
+    std::string lat_low, lat_up, lon_left, lon_right;
+    lat_low = std::to_string(std::min(lat1, lat2));
+    lat_up = std::to_string(std::max(lat1, lat2));
+    lon_left = std::to_string(std::min(lon1, lon2));
+    lon_right = std::to_string(std::max(lon1, lon2));
+
+    lat_low = "-90";
+    lat_up = "90";
+    lon_left = "-180";
+    lon_right = "180";
+
+    std::vector<Way> build;
 
     std::string query, query_tags, query_nodes, pattern_tags, pattern_nodes;
     std::string between, tag_key, tag_val;
-    way mid_way;
-    node mid_node;
+    Way mid_way;
+    Node mid_node;
     unsigned int i, counter = 0;
 
     between =
@@ -85,7 +105,9 @@ DataBase::buildings_receive(std::string &lat_low, std::string &lon_left, std::st
 
     Request req_ways(*this, query);
 
-    std::cout << "selecting ways by coordinates: ";
+//    std::cout << "Selecting ways by coordinates: ";
+    std::cout << "Selecting ways by coordinates... ";
+    std::cout.flush();
 
     while (req_ways.step() != SQLITE_DONE) {
         req_ways.data(mid_way.id, 0);
@@ -93,11 +115,11 @@ DataBase::buildings_receive(std::string &lat_low, std::string &lon_left, std::st
         counter++;
     }
 
-    std::cout << "total " + std::to_string(counter - 1) << std::endl;
+//    std::cout << "total " + std::to_string(counter - 1) << std::endl;
 
     counter = 0;
 
-    std::cout << "selecting building:levels by way.id: ";
+//    std::cout << "Selecting building:levels by way.id: ";
 
     for (i = 0; i < build.size(); ++i) {
         query_tags = pattern_tags + std::to_string(build[i].id) + ";";
@@ -121,8 +143,9 @@ DataBase::buildings_receive(std::string &lat_low, std::string &lon_left, std::st
         }
     }
 
-    std::cout << "total " + std::to_string(i - 1) << std::endl;
-    std::cout << "total nodes " + std::to_string(counter - 1) << std::endl;
+//    std::cout << "total " + std::to_string(i - 1) << std::endl;
+//    std::cout << "Total nodes " + std::to_string(counter - 1) << std::endl;
+    std::cout << "done: " << "number of nodes: " << counter - 1 << std::endl;
 
     return build;
 }
@@ -135,9 +158,12 @@ void DataBase::buildings_receive_test() {
     lat_up = "55.8322596";
     lon_right = "37.7582195";
 
-    std::vector<way> a;
+    std::vector<std::string> coords1 = {lat_low, lon_left};
+    std::vector<std::string> coords2 = {lat_up, lon_right};
 
-    a = buildings_receive(lat_low, lon_left, lat_up, lon_right);
+    std::vector<Way> a;
+
+    a = buildings_receive(coords1, coords2);
     std::cout.precision(8);
     for (int i = 0; i < a.size(); ++i) {
         for (int j = 0; j < a[i].seq.size(); ++j) {
@@ -152,13 +178,13 @@ void DataBase::buildings_receive_test() {
     }
 }
 
-void DataBase::neighbours_receive(const std::string &node_id, std::vector<mate> &mates) {
+void DataBase::neighbours_receive(const std::string &node_id, std::vector<Mate> &mates) {
 
     std::string query, withas, mid_select, query_tag;
     std::vector<std::string> ways;
     std::string mid_way;
     unsigned int i;
-    mate mid_mate;
+    Mate mid_mate;
 
     query = "SELECT way_id FROM ways WHERE node_id = " + node_id + ";";
 
@@ -213,12 +239,12 @@ int DataBase::define_fine(const std::string &path_type) {
     return 0;
 }
 
-std::vector<weightNode> DataBase::getAdjacencyMatrix(uint64_t Node) {
+std::vector<WeightNode> DataBase::getAdjacencyMatrix(uint64_t node) {
 
-    std::vector<weightNode> nodes;
-    std::string node_id = std::to_string(Node);
-    std::vector<mate> mates;
-    weightNode mid_node{};
+    std::vector<WeightNode> nodes;
+    std::string node_id = std::to_string(node);
+    std::vector<Mate> mates;
+    WeightNode mid_node{};
     int i, fine;
 
     neighbours_receive(node_id, mates);
@@ -239,10 +265,10 @@ std::vector<weightNode> DataBase::getAdjacencyMatrix(uint64_t Node) {
     return nodes;
 }
 
-void DataBase::node_coord(const std::string &node_id, node &ret) {
+void DataBase::node_coord(const std::string &node_id, Node &ret) {
 
     std::string query;
-    node mid_node;
+    Node mid_node;
 
     query = "SELECT nodes.lat, nodes.lon "
             "FROM nodes "
@@ -256,10 +282,10 @@ void DataBase::node_coord(const std::string &node_id, node &ret) {
     }
 }
 
-graphNode DataBase::getNode(uint64_t Node) {
-    std::string node_id = std::to_string(Node);
-    graphNode gr_node{};
-    node mid_node;
+GraphNode DataBase::getNode(uint64_t node) {
+    std::string node_id = std::to_string(node);
+    GraphNode gr_node{};
+    Node mid_node;
     node_coord(node_id, mid_node);
     gr_node.x = mid_node.lat;
     gr_node.y = mid_node.lon;
@@ -273,8 +299,8 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
     // TODO: сделать проверку пустоты запроса через count() или количества строк (sqlite3.h)???.
 
     std::string query, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
-    std::vector<node> points;
-    node mid_node;
+    std::vector<Node> points;
+    Node mid_node;
     double radius = 0.00015625; // 1.0 km
     double delta = 0.00015625; // 1.0 km
     unsigned int i;
@@ -284,6 +310,7 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
     mid_node.lon = -1.0;
 
     std::cout << "Searching for the closest node... ";
+    std::cout.flush();
 
     // searching for the closest node by accumulating the radius
     for (i = 1; i < 9; ++i) {
@@ -323,7 +350,7 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
     // RunTimeError assertion
     assert(!points.empty());
 
-    std::vector<node> result;
+    std::vector<Node> result;
     Closest finder;
 
     result = finder.kClosest(points, 1);
@@ -336,14 +363,15 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
 std::map<uint64_t, std::vector<uint64_t>>
 DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
 
-    std::cout << "Building adjacencyMatrix... ";
+    std::cout << "Building adjacency matrix... ";
+    std::cout.flush();
 
     std::map<uint64_t, std::vector<uint64_t>> dict;
     std::string query_matrix, between, query_nodes;
     std::string start_node, end_node, lat_low, lat_up, lon_left, lon_right;
     double lat1, lat2, lon1, lon2, delta;
-    mate mid_mate;
-    node mid_node;
+    Mate mid_mate;
+    Node mid_node;
 
     delta = 0.000625;
 
@@ -459,11 +487,11 @@ Closest::Closest() = default;
 
 Closest::~Closest() = default;
 
-std::vector<node> Closest::kClosest(std::vector<node> &points, int k) {
+std::vector<Node> Closest::kClosest(std::vector<Node> &points, int k) {
     return quickSelect(points, k);
 }
 
-std::vector<node> Closest::quickSelect(std::vector<node> &points, int k) {
+std::vector<Node> Closest::quickSelect(std::vector<Node> &points, int k) {
     int left = 0, right = points.size() - 1;
     int pivotIndex = points.size();
     while (pivotIndex != k) {
@@ -478,11 +506,11 @@ std::vector<node> Closest::quickSelect(std::vector<node> &points, int k) {
     }
 
     // Return the first k elements of the partially sorted vector
-    return std::vector<node>(points.begin(), points.begin() + k);
+    return std::vector<Node>(points.begin(), points.begin() + k);
 }
 
-int Closest::partition(std::vector<node> &points, int left, int right) {
-    node &pivot = choosePivot(points, left, right);
+int Closest::partition(std::vector<Node> &points, int left, int right) {
+    Node &pivot = choosePivot(points, left, right);
     double pivotDist = squaredDistance(pivot);
     while (left < right) {
         // Iterate through the range and swap elements to make sure
@@ -503,17 +531,17 @@ int Closest::partition(std::vector<node> &points, int left, int right) {
     return left;
 }
 
-node &Closest::choosePivot(std::vector<node> &points, int left, int right) {
+Node &Closest::choosePivot(std::vector<Node> &points, int left, int right) {
     // Choose a pivot element of the vector
     return points[left + (right - left) / 2];
 }
 
-double Closest::squaredDistance(node &point) {
+double Closest::squaredDistance(Node &point) {
     // Calculate and return the squared Euclidean distance
     return point.lat * point.lat + point.lon * point.lon;
 }
 
-void Closest::shift(node zero, node point) {
+void Closest::shift(Node zero, Node point) {
     // change coordinate system:
     // u = x - xZero;
     // v = y - yZero;

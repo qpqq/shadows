@@ -45,27 +45,27 @@
 #define UNCLASSIFIED    31
 #define VIA_FERRATA     32
 
-struct node {
+struct Node {
     unsigned long long int id;
     double lat;
     double lon;
     std::map<std::string, std::string> tags;
 };
 
-struct way {
+struct Way {
     unsigned long long int id;
-    std::vector<node> seq;
+    std::vector<Node> seq;
     std::map<std::string, std::string> tags;
 };
 
-struct mate {
+struct Mate {
     unsigned long long int id;
     unsigned long long int prev;           // previous node in the array
     unsigned long long int next;           // next node in the array
     std::string path_type;      // way_tag for classifying roads
 };
 
-struct graphShadingEdge {
+struct GraphShadingEdge {
     uint64_t fineness; // Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
     double shading; // Затененность дороги выраженная в длине незатененной части
     double length; // Длина дороги
@@ -73,20 +73,21 @@ struct graphShadingEdge {
     uint64_t prevNode; // Вершина начала ребра
 };
 
-struct graphNode {
+struct GraphNode {
     double x;
     double y;
 };
 
-struct graphRoute {
-    std::vector<graphNode> Nodes;
+struct GraphRoute {
+    std::vector<GraphNode> Nodes;
     double shading;
 };
 
-struct weightNode {
+struct WeightNode {
     uint64_t index;
     int fineness;
 };
+
 
 class DataBase {
 
@@ -153,32 +154,29 @@ public:
 
     /**
      * Returns building data
-     * @param lat_low lower bound
-     * @param lon_left left bound
-     * @param lat_up upper bound
-     * @param lon_right right bound
+     * @param coords string vector {latitude, longitude}
      * @return vector of ways
      */
-    std::vector<way>
-    buildings_receive(std::string &lat_low, std::string &lon_left, std::string &lat_up, std::string &lon_right);
+    std::vector<Way> buildings_receive(std::vector<std::string> &coords1, std::vector<std::string> &coords2);
 
     void buildings_receive_test();
 
-    void neighbours_receive(const std::string &node_id, std::vector<mate> &mates);
+    void neighbours_receive(const std::string &node_id, std::vector<Mate> &mates);
 
     int define_fine(const std::string &path_type);
 
-    std::vector<weightNode> getAdjacencyMatrix(uint64_t Node);
+    std::vector<WeightNode> getAdjacencyMatrix(uint64_t node);
 
     std::map<uint64_t, std::vector<uint64_t>>
     getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode);
 
-    void node_coord(const std::string &node_id, node &ret);
+    void node_coord(const std::string &node_id, Node &ret);
 
-    graphNode getNode(uint64_t Node);
+    GraphNode getNode(uint64_t node);
 
     unsigned long long int closestNode(const std::vector<std::string> &coords);
 };
+
 
 class Request {
 
@@ -201,19 +199,20 @@ public:
     ~Request();
 };
 
+
 class Closest {
 
 private:
 
-    std::vector<node> quickSelect(std::vector<node> &points, int k);
+    std::vector<Node> quickSelect(std::vector<Node> &points, int k);
 
-    int partition(std::vector<node> &points, int left, int right);
+    int partition(std::vector<Node> &points, int left, int right);
 
-    node &choosePivot(std::vector<node> &points, int left, int right);
+    Node &choosePivot(std::vector<Node> &points, int left, int right);
 
-    double squaredDistance(node &point);
+    double squaredDistance(Node &point);
 
-    void shift(node zero, node point);
+    void shift(Node zero, Node point);
 
 public:
 
@@ -221,5 +220,5 @@ public:
 
     ~Closest();
 
-    std::vector<node> kClosest(std::vector<node> &points, int k);
+    std::vector<Node> kClosest(std::vector<Node> &points, int k);
 };
