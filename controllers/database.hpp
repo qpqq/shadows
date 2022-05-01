@@ -64,9 +64,9 @@ struct mate {
 };
 
 struct mate_matrix {
-    unsigned long long int      id;
-    unsigned long long int      prev;           // previous node in the array
-    unsigned long long int      next;           // next node in the array
+    unsigned long long int id;
+    unsigned long long int prev;           // previous node in the array
+    unsigned long long int next;           // next node in the array
 };
 
 struct graphShadingEdge {
@@ -181,7 +181,7 @@ public:
 
     graphNode getNode(uint64_t Node);
 
-    unsigned long long int closestNode(const std::string &lat, const std::string &lon);
+    unsigned long long int closestNode(const std::vector<std::string> &coords);
 };
 
 class Request {

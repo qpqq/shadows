@@ -266,7 +266,9 @@ graphNode DataBase::getNode(uint64_t Node) {
     return gr_node;
 }
 
-unsigned long long int DataBase::closestNode(const std::string &lat, const std::string &lon) {
+unsigned long long int DataBase::closestNode(const std::vector<std::string> &coords) {
+    const std::string &lat = coords[0];
+    const std::string &lon = coords[1];
     std::string query, sq, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
     double radius = 0.0003125; // 0.125 km
     unsigned int i;
@@ -319,7 +321,9 @@ unsigned long long int DataBase::closestNode(const std::string &lat, const std::
 
 std::map<uint64_t, std::vector<uint64_t>>
 DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
-    
+
+    std::cout << "Making adjacency matrix" << std::endl;
+
     std::map<uint64_t, std::vector<uint64_t>> dict;
     std::string query_matrix, between, query_nodes;
     std::string start_node, end_node, lat_low, lat_up, lon_left, lon_right;
@@ -374,7 +378,7 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
 
     query_matrix = "SELECT ways.node_id, "
             "LAG(ways.node_id, 1, 0) OVER (ORDER BY ways.way_id, ways.seq_id)  pv, "
-            "LEAD(ways.node_id, 1, 0) OVER (ORDER BY ways.way_id, ways.seq_id) nt " 
+            "LEAD(ways.node_id, 1, 0) OVER (ORDER BY ways.way_id, ways.seq_id) nt "
             "FROM ways "
             "JOIN nodes ON ways.node_id = nodes.node_id "
             "JOIN way_tags ON way_tags.way_id = ways.way_id "
@@ -396,8 +400,12 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
         if (mid_mate.next != 0) {
             dict[mid_mate.id].push_back(mid_mate.next);
         }
-        
+
     }
+
+    std::cout << "Making adjacency matrix" << " done" << std::endl;
+    std::cout << "Number of elements: " << dict.size() << std::endl;
+
     return dict;
 }
 

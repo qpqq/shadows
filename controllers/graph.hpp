@@ -12,6 +12,10 @@
 
 class Graph {
 
+private:
+
+    DataBase db;
+
 public:
 
     std::vector<graphShadingEdge> edges;
@@ -23,22 +27,24 @@ public:
     */
     Graph();
 
+    explicit Graph(DataBase &db_);
+
     ~Graph();
 
-    graphNode getNode(DataBase &db, uint64_t Node); // -map
+    graphNode getNode(uint64_t Node); // -map
 
     double getShading(graphNode Node1, graphNode Node2); // -shading в метрах
 
-    graphShadingEdge getShadingEdge(DataBase &db, uint64_t fineness, uint64_t Node1, uint64_t Node2);
+    graphShadingEdge getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2);
 
     std::vector<weightNode> getAdjacencyMatrix(uint64_t Node); // -map
 
     double getLength2(graphNode Node1, graphNode Node2);
 
-    double getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
+    double getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
 
-    double getEdgeWeight(DataBase &db, double shading, double length,
+    double getEdgeWeight(double shading, double length,
                          uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
 
-    graphRoute getRoute(DataBase &db, uint64_t startNode, uint64_t endNode); // -output
+    graphRoute getRoute(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation); // -output
 };

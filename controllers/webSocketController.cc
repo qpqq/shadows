@@ -30,20 +30,9 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
                                                recRoot["toLocation"][1].asString()}; //to location coords JSON -> cpp array convert
 
         DataBase db("../controllers/shadow.db");
-        Graph city;
+        Graph city(db);
 
-        auto startNode = db.closestNode(fromLocation[0], fromLocation[1]);
-        auto endNode = db.closestNode(toLocation[0], toLocation[1]);
-
-        std::cout << "Making the route from " << startNode << " to " << endNode << std::endl;
-
-        auto route = city.getRoute(
-                db,
-                startNode,
-                endNode);
-
-        std::cout << "Making the route from " << startNode << " to " << endNode << " done" << std::endl;
-        std::cout << "Number of vertices: " << route.Nodes.size() << std::endl;
+        auto route = city.getRoute(fromLocation, toLocation);
 
 //        double routeCoords[2][2] = {
 //                {
