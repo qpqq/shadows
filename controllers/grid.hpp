@@ -59,7 +59,7 @@ public:
 
     Grid();
 
-    Grid(std::vector<Way> ArrOfWays, double gridStep);
+    Grid(std::vector<std::vector<std::string>> coords, double offset, std::vector<Way> ArrOfWays, double gridStep);
 
     double getColor(iPnt p);
 

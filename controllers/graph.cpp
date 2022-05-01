@@ -1,6 +1,4 @@
 #include "graph.hpp"
-#include "path.cpp"
-
 
 Graph::Graph(DataBase &db) : db(db) {}
 
@@ -33,7 +31,7 @@ std::vector<WeightNode> Graph::getAdjacencyMatrix(uint64_t node) {
 }
 
 double Graph::getLength2(GraphNode node1, GraphNode node2) {
-    return 111200 * 180 / M_PI *
+    return EarthRadius *
            acos(sin(node1.x * M_PI / 180) * sin(node2.x * M_PI / 180) +
                 cos(node1.x * M_PI / 180) * cos(node2.x * M_PI / 180) *
                 cos(node2.y * M_PI / 180 - node1.y * M_PI / 180));
@@ -54,12 +52,15 @@ double Graph::getEdgeWeight(double shading, double length,
 }
 
 
-GraphRoute Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation) {
+GraphRoute
+Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation) {
     uint64_t startNode = db.closestNode(fromLocation);
     uint64_t endNode = db.closestNode(toLocation);
 
-    adjacencyMatrix = db.getAdjacencyMatrixFull(startNode, endNode);
-    grid = Grid(db.buildings_receive(fromLocation, toLocation), 2);
+    double offset = 500;
+    offset /= EarthRadius;
+    adjacencyMatrix = db.getAdjacencyMatrixFull(fromLocation, toLocation, offset);
+    grid = Grid({fromLocation, toLocation}, offset, db.buildingsReceive(fromLocation, toLocation, offset), 1);
 
     std::cout << "Making the route... ";
     std::cout.flush();

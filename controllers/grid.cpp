@@ -2,26 +2,17 @@
 
 Grid::Grid() = default;
 
-Grid::Grid(std::vector<Way> ArrOfWays, double gridStep) : waysArr{std::move(ArrOfWays)}, step{gridStep} {
+Grid::Grid(std::vector<std::vector<std::string>> coords, double offset, std::vector<Way> ArrOfWays, double gridStep)
+        : waysArr{std::move(ArrOfWays)}, step{gridStep} {
+
     std::cout << "Fill the grid with shadows... ";
     std::cout.flush();
 
-    min_lat = 90;
-    max_lat = -90;
-    min_lon = 180;
-    max_lon = -180;
-    for (auto &temp_way: waysArr) {
-        for (auto &temp_node: temp_way.seq) {
-            min_lat = std::min(min_lat, temp_node.lat);
-            max_lat = std::max(max_lat, temp_node.lat);
-            min_lon = std::min(min_lon, temp_node.lon);
-            max_lon = std::max(max_lon, temp_node.lon);
-        }
-    }
-    min_lat *= (1 - alpha / 100);
-    max_lat *= (1 + alpha / 100);
-    min_lon *= (1 - alpha / 100);
-    max_lon *= (1 + alpha / 100);
+    auto bound = DataBase::boundaries(coords, offset);
+    min_lat = std::stod(bound[0]) * (1 - alpha / 100);
+    max_lat = std::stod(bound[1]) * (1 + alpha / 100);
+    min_lon = std::stod(bound[2]) * (1 - alpha / 100);
+    max_lon = std::stod(bound[3]) * (1 + alpha / 100);
 
     double dlat_meters = (max_lat - min_lat) * (EarthPerimeter / 360);
     double dlon_meters = (max_lon - min_lon) * (EarthPerimeter / 360) * cos(to_rad(max_lat));
