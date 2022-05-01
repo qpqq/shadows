@@ -47,11 +47,11 @@ DataBase::DataBase(const std::string &path) {
     }
 }
 
-const char *DataBase::get_path() {
+const char *DataBase::getPath() {
     return path;
 }
 
-sqlite3 *DataBase::get_pointer() {
+sqlite3 *DataBase::getPointer() {
     return db;
 }
 
@@ -59,24 +59,45 @@ DataBase::~DataBase() {
     sqlite3_close(db);
 }
 
+std::string DataBase::toStringWithPrecision(double x, const int n) {
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << x;
+    return out.str();
+}
+
+std::vector<std::string> DataBase::boundaries(const std::vector<std::vector<std::string>> &coords, double offset) {
+    double latLow, latHigh, lonLeft, lonRight;
+    latLow = 90;
+    latHigh = -90;
+    lonLeft = 180;
+    lonRight = -180;
+
+    for (auto coord: coords) {
+        latLow = std::min(latLow, std::stod(coord[0]));
+        latHigh = std::max(latHigh, std::stod(coord[0]));
+        lonLeft = std::min(lonLeft, std::stod(coord[1]));
+        lonRight = std::max(lonRight, std::stod(coord[1]));
+    }
+
+    latLow -= offset;
+    latHigh += offset;
+    lonLeft -= offset;
+    lonRight += offset;
+
+    return {toStringWithPrecision(latLow), toStringWithPrecision(latHigh),
+            toStringWithPrecision(lonLeft), toStringWithPrecision(lonRight)};
+}
+
 std::vector<Way>
-DataBase::buildings_receive(std::vector<std::string> &coords1, std::vector<std::string> &coords2) {
-    double lat1, lon1, lat2, lon2;
-    lat1 = std::stod(coords1[0]);
-    lon1 = std::stod(coords1[1]);
-    lat2 = std::stod(coords2[0]);
-    lon2 = std::stod(coords2[1]);
+DataBase::buildingsReceive(std::vector<std::string> &coords1, std::vector<std::string> &coords2, double offset) {
+    std::string latLow, latHigh, lonLeft, lonRight;
 
-    std::string lat_low, lat_up, lon_left, lon_right;
-    lat_low = std::to_string(std::min(lat1, lat2));
-    lat_up = std::to_string(std::max(lat1, lat2));
-    lon_left = std::to_string(std::min(lon1, lon2));
-    lon_right = std::to_string(std::max(lon1, lon2));
-
-    lat_low = "-90";
-    lat_up = "90";
-    lon_left = "-180";
-    lon_right = "180";
+    auto bound = boundaries({coords1, coords2}, offset);
+    latLow = bound[0];
+    latHigh = bound[1];
+    lonLeft = bound[2];
+    lonRight = bound[3];
 
     std::vector<Way> build;
 
@@ -87,7 +108,7 @@ DataBase::buildings_receive(std::vector<std::string> &coords1, std::vector<std::
     unsigned int i, counter = 0;
 
     between =
-            "(lat BETWEEN " + lat_low + " AND " + lat_up + ")" + " AND (lon BETWEEN " + lon_left + " AND " + lon_right +
+            "(lat BETWEEN " + latLow + " AND " + latHigh + ")" + " AND (lon BETWEEN " + lonLeft + " AND " + lonRight +
             ")";
 
     query = "SELECT way_id "
@@ -150,7 +171,7 @@ DataBase::buildings_receive(std::vector<std::string> &coords1, std::vector<std::
     return build;
 }
 
-void DataBase::buildings_receive_test() {
+[[maybe_unused]] void DataBase::buildingsReceiveTest() {
     std::string lat_low, lon_left, lat_up, lon_right;
 
     lat_low = "55.7274074";
@@ -163,7 +184,7 @@ void DataBase::buildings_receive_test() {
 
     std::vector<Way> a;
 
-    a = buildings_receive(coords1, coords2);
+    a = buildingsReceive(coords1, coords2, 0);
     std::cout.precision(8);
     for (int i = 0; i < a.size(); ++i) {
         for (int j = 0; j < a[i].seq.size(); ++j) {
@@ -178,7 +199,7 @@ void DataBase::buildings_receive_test() {
     }
 }
 
-void DataBase::neighbours_receive(const std::string &node_id, std::vector<Mate> &mates) {
+void DataBase::neighboursReceive(const std::string &node_id, std::vector<Mate> &mates) {
 
     std::string query, withas, mid_select, query_tag;
     std::vector<std::string> ways;
@@ -247,7 +268,7 @@ std::vector<WeightNode> DataBase::getAdjacencyMatrix(uint64_t node) {
     WeightNode mid_node{};
     int i, fine;
 
-    neighbours_receive(node_id, mates);
+    neighboursReceive(node_id, mates);
 
     for (i = 0; i < mates.size(); ++i) {
         fine = define_fine(mates[i].path_type);
@@ -265,10 +286,10 @@ std::vector<WeightNode> DataBase::getAdjacencyMatrix(uint64_t node) {
     return nodes;
 }
 
-void DataBase::node_coord(const std::string &node_id, Node &ret) {
+Node DataBase::nodeCoord(const std::string &node_id) {
 
     std::string query;
-    Node mid_node;
+    Node ret;
 
     query = "SELECT nodes.lat, nodes.lon "
             "FROM nodes "
@@ -280,19 +301,20 @@ void DataBase::node_coord(const std::string &node_id, Node &ret) {
         req_node.data(ret.lat, 0);
         req_node.data(ret.lon, 1);
     }
+
+    return ret;
 }
 
 GraphNode DataBase::getNode(uint64_t node) {
     std::string node_id = std::to_string(node);
     GraphNode gr_node{};
-    Node mid_node;
-    node_coord(node_id, mid_node);
+    Node mid_node = nodeCoord(node_id);
     gr_node.x = mid_node.lat;
     gr_node.y = mid_node.lon;
     return gr_node;
 }
 
-unsigned long long int DataBase::closestNode(const std::vector<std::string> &coords) {
+uint64_t DataBase::closestNode(const std::vector<std::string> &coords) {
     const std::string &lat = coords[0];
     const std::string &lon = coords[1];
 
@@ -316,11 +338,11 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
     for (i = 1; i < 9; ++i) {
 
         radius += delta;
-        _radius = std::to_string(radius);
-        dlat_minus =    lat + " - " + _radius;
-        dlat_plus  =    lat + " + " + _radius;
-        dlon_minus =    lon + " - " + _radius;
-        dlon_plus  =    lon + " + " + _radius;
+        _radius = toStringWithPrecision(radius);
+        dlat_minus = lat + " - " + _radius;
+        dlat_plus = lat + " + " + _radius;
+        dlon_minus = lon + " - " + _radius;
+        dlon_plus = lon + " + " + _radius;
 
         query = "SELECT node_id, lat, lon "
                 "FROM road_nodes "
@@ -361,60 +383,25 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
 }
 
 std::map<uint64_t, std::vector<uint64_t>>
-DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
+DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation,
+                                 double offset) {
+    // TODO удалить road_nodes
 
     std::cout << "Building adjacency matrix... ";
     std::cout.flush();
 
     std::map<uint64_t, std::vector<uint64_t>> dict;
-    std::string query_matrix, between, query_nodes;
-    std::string start_node, end_node, lat_low, lat_up, lon_left, lon_right;
-    double lat1, lat2, lon1, lon2, delta;
+    std::string query_matrix, between;
     Mate mid_mate;
-    Node mid_node;
 
-    delta = 0.000625;
-
-    start_node = std::to_string(startNode);
-    end_node   = std::to_string(endNode);
-
-    query_nodes = "SELECT node_id, lat, lon "
-                  "FROM nodes "
-                  "WHERE node_id = " + start_node + ";";
-
-    Request req1_nodes(*this, query_nodes);
-
-    while (req1_nodes.step() != SQLITE_DONE) {
-        req1_nodes.data(mid_node.id, 0);
-        req1_nodes.data(mid_node.lat, 1);
-        req1_nodes.data(mid_node.lon, 2);
-    }
-
-    lat1 = mid_node.lat;
-    lon1 = mid_node.lon;
-
-    query_nodes = "SELECT node_id, lat, lon "
-                  "FROM nodes "
-                  "WHERE node_id = " + end_node + ";";
-
-    Request req2_nodes(*this, query_nodes);
-
-    while (req2_nodes.step() != SQLITE_DONE) {
-        req2_nodes.data(mid_node.id, 0);
-        req2_nodes.data(mid_node.lat, 1);
-        req2_nodes.data(mid_node.lon, 2);
-    }
-
-    lat2 = mid_node.lat;
-    lon2 = mid_node.lon;
-
-    lat_low   = std::to_string(std::min(lat1, lat2) - delta);
-    lat_up    = std::to_string(std::max(lat1, lat2) + delta);
-    lon_left  = std::to_string(std::min(lon1, lon2) - delta);
-    lon_right = std::to_string(std::max(lon1, lon2) + delta);
+    auto bound = boundaries({fromLocation, toLocation}, offset);
+    std::string latLow = bound[0];
+    std::string latHigh = bound[1];
+    std::string lonLeft = bound[2];
+    std::string lonRight = bound[3];
 
 
-    between = "lat BETWEEN " + lat_low + " AND " + lat_up + " AND lon BETWEEN " + lon_left + " AND " + lon_right;
+    between = "lat BETWEEN " + latLow + " AND " + latHigh + " AND lon BETWEEN " + lonLeft + " AND " + lonRight;
 
     // TODO разорвать два пути вместе
 
@@ -452,7 +439,7 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
 
 Request::Request(DataBase &database, const std::string &query) {
     int flag;
-    sqlite3 *db = database.get_pointer();
+    sqlite3 *db = database.getPointer();
     this->query = query.c_str();
     flag = sqlite3_prepare_v2(db, this->query, -1, &stmt, nullptr);
 

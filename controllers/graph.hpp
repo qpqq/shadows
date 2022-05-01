@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cmath>
 
+#include "path.cpp"
 #include "database.hpp"
 #include "grid.hpp"
 
@@ -21,6 +22,8 @@ private:
     std::vector<GraphShadingEdge> edges;
     std::vector<GraphNode> nodes;
     std::map<uint64_t, std::vector<uint64_t>> adjacencyMatrix;
+
+    double EarthRadius = 63781000;
 
 public:
 

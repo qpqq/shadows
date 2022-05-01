@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cassert>
 #include <algorithm>
+#include <sstream>
 
 #include "sqlite/sqlite3.h"
 
@@ -141,40 +142,64 @@ public:
     /**
      * Constructor with a database path
      * @param path to database
-     *
      * Single-argument constructors must be marked explicit to avoid unintentional implicit conversions
      */
     explicit DataBase(const std::string &path);
 
+    /**
+    * Default destructor
+    */
     ~DataBase();
 
-    const char *get_path();
+    const char *getPath();
 
-    sqlite3 *get_pointer();
+    sqlite3 *getPointer();
+
+    /**
+     * Converts doubles to string with the specified precision.
+     * @param x double
+     * @param n number of digits after the decimal iPnt
+     * @return string
+     */
+    static std::string toStringWithPrecision(double x, int n = 10);
+
+    /**
+     * Calculates the boundary coordinates
+     * @param coords coordinate vector {latitude, longitude}
+     * @param offset boundary offset. In radians
+     * @return vector of border coordinates {lower, upper, left, right}
+     */
+    static std::vector<std::string> boundaries(const std::vector<std::vector<std::string>> &coords, double offset = 0);
 
     /**
      * Returns building data
      * @param coords string vector {latitude, longitude}
+     * @param offset boundary offset. In radians
      * @return vector of ways
      */
-    std::vector<Way> buildings_receive(std::vector<std::string> &coords1, std::vector<std::string> &coords2);
+    std::vector<Way>
+    buildingsReceive(std::vector<std::string> &coords1, std::vector<std::string> &coords2, double offset);
 
-    void buildings_receive_test();
+    /**
+     * Test for buildingsReceive
+     */
+    [[maybe_unused]] void buildingsReceiveTest();
 
-    void neighbours_receive(const std::string &node_id, std::vector<Mate> &mates);
+    void neighboursReceive(const std::string &node_id, std::vector<Mate> &mates);
 
     int define_fine(const std::string &path_type);
 
     std::vector<WeightNode> getAdjacencyMatrix(uint64_t node);
 
     std::map<uint64_t, std::vector<uint64_t>>
-    getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode);
+    getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation,
+                           double offset = 0);
 
-    void node_coord(const std::string &node_id, Node &ret);
+    Node nodeCoord(const std::string &node_id);
 
     GraphNode getNode(uint64_t node);
 
-    unsigned long long int closestNode(const std::vector<std::string> &coords);
+    uint64_t closestNode(const std::vector<std::string> &coords);
 };
 
 
