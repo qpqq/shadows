@@ -9,25 +9,22 @@
 #include <cmath>
 
 #include "database.hpp"
+#include "grid.hpp"
 
 class Graph {
 
 private:
 
-    DataBase db;
-
-public:
+    DataBase &db;
+    Grid grid;
 
     std::vector<graphShadingEdge> edges;
     std::vector<graphNode> nodes;
     std::map<uint64_t, std::vector<uint64_t>> adjacencyMatrix;
 
-    /**
-    * Default constructor
-    */
-    Graph();
+public:
 
-    explicit Graph(DataBase &db_);
+    explicit Graph(DataBase &db);
 
     ~Graph();
 

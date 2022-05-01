@@ -1,7 +1,7 @@
 #include "grid.hpp"
 #include "solar.hpp"
 
-//Grid::Grid() = default;
+Grid::Grid() = default;
 
 Grid::Grid(std::vector<way> &ArrOfWays, double gridStep) : waysArr{ArrOfWays}, step{gridStep} {
     min_lat = 90;

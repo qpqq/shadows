@@ -31,20 +31,20 @@ class Grid {
 
 private:
 
-    std::vector<way> &waysArr;
+    std::vector<way> waysArr;
 
-    double step;
+    double step{};
 
-    double min_lat, max_lat;
-    double min_lon, max_lon;
+    double min_lat{}, max_lat{};
+    double min_lon{}, max_lon{};
 
-    int n_lat;
-    int n_lon;
-    int n_x;
-    int n_y;
+    int n_lat{};
+    int n_lon{};
+    int n_x{};
+    int n_y{};
 
-    double dlat;
-    double dlon;
+    double dlat{};
+    double dlon{};
 
     double height = 3;
 
@@ -54,7 +54,7 @@ private:
 
 public:
 
-//    Grid();
+    Grid();
 
     Grid(std::vector<way> &ArrOfWays, double gridStep);
 

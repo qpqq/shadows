@@ -1,11 +1,8 @@
 #include "graph.hpp"
 #include "path.cpp"
 
-Graph::Graph() = default;
 
-Graph::Graph(DataBase &db_) {
-    db = db_;
-}
+Graph::Graph(DataBase &db) : db(db) {}
 
 Graph::~Graph() = default;
 
@@ -36,9 +33,10 @@ std::vector<weightNode> Graph::getAdjacencyMatrix(uint64_t Node) {
 }
 
 double Graph::getLength2(graphNode Node1, graphNode Node2) {
-    return 111200 * 180 / M_PI * acos(sin((Node1.x * M_PI) / 180) * sin((Node2.x * M_PI) / 180) +
-                                      cos((Node1.x * M_PI) / 180) * cos((Node2.x * M_PI) / 180) *
-                                      cos((Node2.y * M_PI) / 180 - (Node1.y * M_PI) / 180));
+    return 111200 * 180 / M_PI *
+           acos(sin(Node1.x * M_PI / 180) * sin(Node2.x * M_PI / 180) +
+                cos(Node1.x * M_PI / 180) * cos(Node2.x * M_PI / 180) *
+                cos(Node2.y * M_PI / 180 - Node1.y * M_PI / 180));
 }
 
 double
@@ -60,9 +58,10 @@ graphRoute Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<s
     uint64_t startNode = db.closestNode(fromLocation);
     uint64_t endNode = db.closestNode(toLocation);
 
-    std::cout << "Making the route from " << startNode << " to " << endNode << std::endl;
-
     adjacencyMatrix = db.getAdjacencyMatrixFull(startNode, endNode);
+//    grid = Grid(db.buildings_receive())
+
+    std::cout << "Making the route... ";
 
     minimumsSet minSet;
     usedSet usedSet;
@@ -75,7 +74,7 @@ graphRoute Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<s
     while (minSet.is_empty() == 0) {
         minimumsSet::minimumsSetElement el = minSet.getMinimum();
 
-        std::cout << el.nodeIndex << " node cnt:" << cnt << " length: " << el.key << std::endl;
+//        std::cout << el.nodeIndex << " node cnt:" << cnt << " length: " << el.key << std::endl;
 
         if (el.nodeIndex == endNode) {
             uint64_t node = endNode;
@@ -105,8 +104,8 @@ graphRoute Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<s
         usedSet.update(el.nodeIndex, 1);
     }
 
-    std::cout << "Making the route from " << startNode << " to " << endNode << " done" << std::endl;
-    std::cout << "Number of vertices: " << ans.Nodes.size() << std::endl;
+    std::cout << "done: ";
+    std::cout << "number of vertices: " << ans.Nodes.size() << std::endl;
 
     return ans;
 }
