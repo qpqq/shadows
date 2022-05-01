@@ -405,7 +405,7 @@ DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::ve
 
     // TODO разорвать два пути вместе
 
-    query_matrix = "SELECT node_id, pv, nt "
+    query_matrix = "SELECT node_id, prev, next "
                    "FROM adjacency "
                    "WHERE " + between + ";";
 
