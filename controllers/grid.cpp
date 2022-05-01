@@ -4,6 +4,7 @@ Grid::Grid() = default;
 
 Grid::Grid(std::vector<Way> ArrOfWays, double gridStep) : waysArr{std::move(ArrOfWays)}, step{gridStep} {
     std::cout << "Fill the grid with shadows... ";
+    std::cout.flush();
 
     min_lat = 90;
     max_lat = -90;
@@ -17,6 +18,10 @@ Grid::Grid(std::vector<Way> ArrOfWays, double gridStep) : waysArr{std::move(ArrO
             max_lon = std::max(max_lon, temp_node.lon);
         }
     }
+    min_lat *= (1 - alpha / 100);
+    max_lat *= (1 + alpha / 100);
+    min_lon *= (1 - alpha / 100);
+    max_lon *= (1 + alpha / 100);
 
     double dlat_meters = (max_lat - min_lat) * (EarthPerimeter / 360);
     double dlon_meters = (max_lon - min_lon) * (EarthPerimeter / 360) * cos(to_rad(max_lat));
@@ -26,14 +31,15 @@ Grid::Grid(std::vector<Way> ArrOfWays, double gridStep) : waysArr{std::move(ArrO
     n_x = n_lon;
     n_y = n_lat;
 
-    dlat = (max_lat - min_lat) / n_lat;
-    dlon = (max_lon - min_lon) / n_lon;
+    dlat = (max_lat - min_lat) / (double) n_lat;
+    dlon = (max_lon - min_lon) / (double) n_lon;
 
     for (int i = 0; i < n_y; i++) {
         std::vector<double> temp(n_x, 0);
         grid.push_back(temp);
     }
 
+//    _fillIn(0, (int) waysArr.size());
     fillIn();
 
     std::cout << "done: " << n_x << "×" << n_y << std::endl;
@@ -56,6 +62,11 @@ iPnt Grid::pntToPnt(double lat, double lon) const {
     int y = (int) ((lat - min_lat) / dlat);
     int x = (int) ((lon - min_lon) / dlon);
 
+    if (x < 0 or x > n_x - 1 or y < 0 or y > n_y - 1)
+        std::cerr << "Out of bounds" << std::endl;
+
+    x = std::max(0, x);
+    y = std::max(0, y);
     y = std::min(y, n_y - 1);
     x = std::min(x, n_x - 1);
 

@@ -32,7 +32,10 @@ DataBase::DataBase() = default;
 DataBase::DataBase(const std::string &path) {
     int flag;
     this->path = path.c_str();
+
     std::cout << "Opening " << path << "... ";
+    std::cout.flush();
+
     flag = sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, nullptr);
 
     if (flag != SQLITE_OK) {
@@ -58,14 +61,22 @@ DataBase::~DataBase() {
 
 std::vector<Way>
 DataBase::buildings_receive(std::vector<std::string> &coords1, std::vector<std::string> &coords2) {
-    double lat1 = std::stod(coords1[0]);
-    double lon1 = std::stod(coords1[1]);
-    double lat2 = std::stod(coords2[0]);
-    double lon2 = std::stod(coords2[1]);
-    std::string lat_low = std::to_string(std::min(lat1, lat2));
-    std::string lat_up = std::to_string(std::max(lat1, lat2));
-    std::string lon_left = std::to_string(std::min(lon1, lon2));
-    std::string lon_right = std::to_string(std::max(lon1, lon2));
+    double lat1, lon1, lat2, lon2;
+    lat1 = std::stod(coords1[0]);
+    lon1 = std::stod(coords1[1]);
+    lat2 = std::stod(coords2[0]);
+    lon2 = std::stod(coords2[1]);
+
+    std::string lat_low, lat_up, lon_left, lon_right;
+    lat_low = std::to_string(std::min(lat1, lat2));
+    lat_up = std::to_string(std::max(lat1, lat2));
+    lon_left = std::to_string(std::min(lon1, lon2));
+    lon_right = std::to_string(std::max(lon1, lon2));
+
+    lat_low = "-90";
+    lat_up = "90";
+    lon_left = "-180";
+    lon_right = "180";
 
     std::vector<Way> build;
 
@@ -96,6 +107,7 @@ DataBase::buildings_receive(std::vector<std::string> &coords1, std::vector<std::
 
 //    std::cout << "Selecting ways by coordinates: ";
     std::cout << "Selecting ways by coordinates... ";
+    std::cout.flush();
 
     while (req_ways.step() != SQLITE_DONE) {
         req_ways.data(mid_way.id, 0);
@@ -298,6 +310,7 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
     mid_node.lon = -1.0;
 
     std::cout << "Searching for the closest node... ";
+    std::cout.flush();
 
     // searching for the closest node by accumulating the radius
     for (i = 1; i < 9; ++i) {
@@ -351,6 +364,7 @@ std::map<uint64_t, std::vector<uint64_t>>
 DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
 
     std::cout << "Building adjacency matrix... ";
+    std::cout.flush();
 
     std::map<uint64_t, std::vector<uint64_t>> dict;
     std::string query_matrix, between, query_nodes;

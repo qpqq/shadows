@@ -59,9 +59,10 @@ GraphRoute Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<s
     uint64_t endNode = db.closestNode(toLocation);
 
     adjacencyMatrix = db.getAdjacencyMatrixFull(startNode, endNode);
-    grid = Grid(db.buildings_receive(fromLocation, toLocation), 1);
+    grid = Grid(db.buildings_receive(fromLocation, toLocation), 2);
 
     std::cout << "Making the route... ";
+    std::cout.flush();
 
     minimumsSet minSet;
     usedSet usedSet;

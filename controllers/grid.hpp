@@ -47,6 +47,8 @@ private:
     double dlat{};
     double dlon{};
 
+    double alpha = 0.01;
+
     double height = 3;
 
     double elev = 1, azim = 180;
