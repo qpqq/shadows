@@ -58,15 +58,10 @@ struct way {
 };
 
 struct mate {
-    unsigned long long int prev;           // previous node in the array
-    unsigned long long int next;           // next node in the array
-    std::string path_type;      // way_tag for classifying roads
-};
-
-struct mate_matrix {
     unsigned long long int id;
     unsigned long long int prev;           // previous node in the array
     unsigned long long int next;           // next node in the array
+    std::string            path_type;      // way_tag for classifying roads
 };
 
 struct graphShadingEdge {
@@ -203,4 +198,19 @@ public:
     void data(std::string &ret, int col_id);
 
     ~Request();
+};
+
+class Closest {
+
+private:
+    std::vector<node> quickSelect(std::vector<node> &points, int k);
+    int partition(std::vector<node> &points, int left, int right);
+    node &choosePivot(std::vector<node> &points, int left, int right);
+    double squaredDistance(node &point);
+    void shift(node zero, node point);
+
+public:
+    Closest() {};
+    ~Closest() {};
+    std::vector<node> kClosest(std::vector<node> &points, int k);
 };

@@ -269,66 +269,77 @@ graphNode DataBase::getNode(uint64_t Node) {
 unsigned long long int DataBase::closestNode(const std::vector<std::string> &coords) {
     const std::string &lat = coords[0];
     const std::string &lon = coords[1];
-    std::string query, sq, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
-    double radius = 0.0003125; // 0.125 km
+    
+    // TODO: сделать проверку пустоты запроса через count() или количества строк (sqlite3.h)???.
+
+    std::string query, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
+    std::vector<node> points;
+    node mid_node;
+    double radius = 0.00015625; // 1.0 km
+    double delta = 0.00015625; // 1.0 km
     unsigned int i;
 
-    node ret;
-    ret.id = 0;
-    ret.lat = -1.0;
-    ret.lon = -1.0;
+    mid_node.id = 0;
+    mid_node.lat = -1.0;
+    mid_node.lon = -1.0;
 
-    sq = "sqrt((lat - " + lat + ")*(lat - " + lat + ") + (lon - " + lon + ")*(lon - " + lon + "))";
+    std::cout << "searching for the closest node... ";
 
     // searching for the closest node by accumulating the radius
     for (i = 1; i < 9; ++i) {
 
-        radius += radius;
+        radius += delta;
         _radius = std::to_string(radius);
         dlat_minus =    lat + " - " + _radius;
         dlat_plus  =    lat + " + " + _radius;
         dlon_minus =    lon + " - " + _radius;
         dlon_plus =     lon + " + " + _radius;
 
-        query = "SELECT nodes.node_id, lat, lon, " + sq + " AS rho "
-                "FROM nodes "
-                "JOIN ways ON ways.node_id = nodes.node_id "
-                "JOIN way_tags ON way_tags.way_id = ways.way_id "
-                "WHERE way_tags.tag_key = 'highway' AND lat BETWEEN " + dlat_minus + " AND " + dlat_plus + " AND lon BETWEEN " + dlon_minus + " AND " + dlon_plus + " AND rho != 0 "
-                "GROUP BY nodes.node_id "
-                "ORDER BY rho ASC "
-                "LIMIT 1;";
+        query = "SELECT node_id, lat, lon "
+                "FROM road_nodes "
+                "WHERE lat BETWEEN " + dlat_minus + " AND " + dlat_plus + " AND  lon BETWEEN " + dlon_minus + " AND " + dlon_plus + ";";
 
         Request req(*this, query);
 
         while (req.step() != SQLITE_DONE) {
-            req.data(ret.id, 0);
-            req.data(ret.lat, 1);
-            req.data(ret.lon, 2);
+
+            req.data(mid_node.id, 0);
+            req.data(mid_node.lat, 1);
+            req.data(mid_node.lon, 2);
+
+            if (mid_node.id != 0) {
+                points.push_back(mid_node);
+            }
+
         }
 
-        if (ret.lat != -1.0 && ret.lon != -1.0) {
+        if (points.size() > 0) {
             break;
         }
 
     }
 
     // RunTimeError assertion
-    assert(ret.lat != -1.0 && ret.lon != -1.0);
+    assert(points.size() > 0);
 
-    return ret.id;
+    std::vector<node> result;
+    Closest finder;
+
+    result = finder.kClosest(points, 1);
+
+    std::cout << "done: " << result[0].id << std::endl; 
+
+    return result[0].id;
 }
 
 std::map<uint64_t, std::vector<uint64_t>>
 DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
 
-    std::cout << "Making adjacency matrix" << std::endl;
-
     std::map<uint64_t, std::vector<uint64_t>> dict;
     std::string query_matrix, between, query_nodes;
     std::string start_node, end_node, lat_low, lat_up, lon_left, lon_right;
     double lat1, lat2, lon1, lon2, delta;
-    mate_matrix mid_mate;
+    mate mid_mate;
     node mid_node;
 
     delta = 0.000625;
@@ -372,19 +383,15 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
     lon_right = std::to_string(std::max(lon1, lon2) + delta);
 
 
-    between = "lat BETWEEN " + lat_low + " AND " + lat_up + " AND lon BETWEEN " + lon_left + " AND " + lon_right + " ";
+    between = "lat BETWEEN " + lat_low + " AND " + lat_up + " AND lon BETWEEN " + lon_left + " AND " + lon_right;
 
     // TODO разорвать два пути вместе
 
-    query_matrix = "SELECT ways.node_id, "
-            "LAG(ways.node_id, 1, 0) OVER (ORDER BY ways.way_id, ways.seq_id)  pv, "
-            "LEAD(ways.node_id, 1, 0) OVER (ORDER BY ways.way_id, ways.seq_id) nt "
-            "FROM ways "
-            "JOIN nodes ON ways.node_id = nodes.node_id "
-            "JOIN way_tags ON way_tags.way_id = ways.way_id "
-            "WHERE " + between + " " +
-            "AND way_tags.tag_key = 'highway' "
-            "OR way_tags.tag_key = 'bridge';";
+    query_matrix = "SELECT node_id, pv, nt "
+                   "FROM adjacency "
+                   "WHERE " + between + ";";
+
+    std::cout << "building AdjacencyMatrix... ";
 
     Request req_matrix(*this, query_matrix);
 
@@ -400,13 +407,14 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
         if (mid_mate.next != 0) {
             dict[mid_mate.id].push_back(mid_mate.next);
         }
-
+        
     }
 
-    std::cout << "Making adjacency matrix" << " done" << std::endl;
+    std::cout << "done" << std::endl;
     std::cout << "Number of elements: " << dict.size() << std::endl;
 
     return dict;
+
 }
 
 Request::Request(DataBase &database, const std::string &query) {
@@ -440,4 +448,67 @@ void Request::data(std::string &ret, int col_id) {
 
 Request::~Request() {
     sqlite3_finalize(stmt);
+}
+
+std::vector<node> Closest::kClosest(std::vector<node> &points, int k) {
+    return quickSelect(points, k);
+}
+
+std::vector<node> Closest::quickSelect(std::vector<node> &points, int k) {
+    int left = 0, right = points.size() - 1;
+    int pivotIndex = points.size();
+    while (pivotIndex != k) {
+        // Repeatedly partition the vector
+        // while narrowing in on the kth element
+        pivotIndex = partition(points, left, right);
+        if (pivotIndex < k) {
+            left = pivotIndex;
+        } else {
+            right = pivotIndex - 1;
+        }
+    }
+    
+    // Return the first k elements of the partially sorted vector
+    return std::vector<node>(points.begin(), points.begin() + k);
+}
+
+int Closest::partition(std::vector<node> &points, int left, int right) {
+    node &pivot = choosePivot(points, left, right);
+    double pivotDist = squaredDistance(pivot);
+    while (left < right) {
+        // Iterate through the range and swap elements to make sure
+        // that all points closer than the pivot are to the left
+        if (squaredDistance(points[left]) >= pivotDist) {
+            std::swap(points[left], points[right]);
+            // points[left].swap(points[right]);
+            right--;
+        } else {
+            left++;
+        }
+    }
+    
+    // Ensure the left pointer is just past the end of
+    // the left range then return it as the new pivotIndex
+    if (squaredDistance(points[left]) < pivotDist)
+        left++;
+    return left;
+}
+
+node &Closest::choosePivot(std::vector<node> &points, int left, int right) {
+    // Choose a pivot element of the vector
+    return points[left + (right - left) / 2];
+}
+
+double Closest::squaredDistance(node &point) {
+    // Calculate and return the squared Euclidean distance
+    return point.lat * point.lat + point.lon * point.lon;
+}
+
+void Closest::shift(node zero, node point) {
+    // change coordinate system:
+    // u = x - xZero;
+    // v = y - yZero;
+    
+    point.lat = point.lat - zero.lat;
+    point.lon = point.lon - zero.lon;
 }
