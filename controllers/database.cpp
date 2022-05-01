@@ -32,7 +32,7 @@ DataBase::DataBase() = default;
 DataBase::DataBase(const std::string &path) {
     int flag;
     this->path = path.c_str();
-    std::cout << "Opening " << path << "... ";
+    std::cout << "Opening " << path << std::endl;
     flag = sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, nullptr);
 
     if (flag != SQLITE_OK) {
@@ -40,7 +40,7 @@ DataBase::DataBase(const std::string &path) {
         std::cerr << "response: " << sqlite3_errmsg(db) << std::endl;
         assert(flag == SQLITE_OK);
     } else {
-        std::cout << "done" << std::endl;
+        std::cout << "Opening " << path << " done" << std::endl;
     }
 }
 
@@ -269,7 +269,7 @@ graphNode DataBase::getNode(uint64_t Node) {
 unsigned long long int DataBase::closestNode(const std::vector<std::string> &coords) {
     const std::string &lat = coords[0];
     const std::string &lon = coords[1];
-
+    
     // TODO: сделать проверку пустоты запроса через count() или количества строк (sqlite3.h)???.
 
     std::string query, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
@@ -283,7 +283,7 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
     mid_node.lat = -1.0;
     mid_node.lon = -1.0;
 
-    std::cout << "Searching for the closest node... ";
+    std::cout << "searching for the closest node... ";
 
     // searching for the closest node by accumulating the radius
     for (i = 1; i < 9; ++i) {
@@ -293,12 +293,11 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
         dlat_minus =    lat + " - " + _radius;
         dlat_plus  =    lat + " + " + _radius;
         dlon_minus =    lon + " - " + _radius;
-        dlon_plus  =    lon + " + " + _radius;
+        dlon_plus =     lon + " + " + _radius;
 
         query = "SELECT node_id, lat, lon "
                 "FROM road_nodes "
-                "WHERE lat BETWEEN " + dlat_minus + " AND " + dlat_plus + " AND  lon BETWEEN " + dlon_minus + " AND " +
-                dlon_plus + ";";
+                "WHERE lat BETWEEN " + dlat_minus + " AND " + dlat_plus + " AND  lon BETWEEN " + dlon_minus + " AND " + dlon_plus + ";";
 
         Request req(*this, query);
 
@@ -314,29 +313,27 @@ unsigned long long int DataBase::closestNode(const std::vector<std::string> &coo
 
         }
 
-        if (!points.empty()) {
+        if (points.size() > 0) {
             break;
         }
 
     }
 
     // RunTimeError assertion
-    assert(!points.empty());
+    assert(points.size() > 0);
 
     std::vector<node> result;
     Closest finder;
 
     result = finder.kClosest(points, 1);
 
-    std::cout << "done: " << result[0].id << std::endl;
+    std::cout << "done: " << result[0].id << std::endl; 
 
     return result[0].id;
 }
 
 std::map<uint64_t, std::vector<uint64_t>>
 DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
-
-    std::cout << "Building adjacencyMatrix... ";
 
     std::map<uint64_t, std::vector<uint64_t>> dict;
     std::string query_matrix, between, query_nodes;
@@ -348,7 +345,7 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
     delta = 0.000625;
 
     start_node = std::to_string(startNode);
-    end_node   = std::to_string(endNode);
+    end_node =   std::to_string(endNode);
 
     query_nodes = "SELECT node_id, lat, lon "
                   "FROM nodes "
@@ -394,6 +391,8 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
                    "FROM adjacency "
                    "WHERE " + between + ";";
 
+    std::cout << "building AdjacencyMatrix... ";
+
     Request req_matrix(*this, query_matrix);
 
     while (req_matrix.step() != SQLITE_DONE) {
@@ -408,11 +407,11 @@ DataBase::getAdjacencyMatrixFull(uint64_t startNode, uint64_t endNode) {
         if (mid_mate.next != 0) {
             dict[mid_mate.id].push_back(mid_mate.next);
         }
-
+        
     }
 
-    std::cout << "done: ";
-    std::cout << "number of elements: " << dict.size() << std::endl;
+    std::cout << "done" << std::endl;
+    std::cout << "Number of elements: " << dict.size() << std::endl;
 
     return dict;
 
@@ -451,10 +450,6 @@ Request::~Request() {
     sqlite3_finalize(stmt);
 }
 
-Closest::Closest() = default;
-
-Closest::~Closest() = default;
-
 std::vector<node> Closest::kClosest(std::vector<node> &points, int k) {
     return quickSelect(points, k);
 }
@@ -472,7 +467,7 @@ std::vector<node> Closest::quickSelect(std::vector<node> &points, int k) {
             right = pivotIndex - 1;
         }
     }
-
+    
     // Return the first k elements of the partially sorted vector
     return std::vector<node>(points.begin(), points.begin() + k);
 }
@@ -491,7 +486,7 @@ int Closest::partition(std::vector<node> &points, int left, int right) {
             left++;
         }
     }
-
+    
     // Ensure the left pointer is just past the end of
     // the left range then return it as the new pivotIndex
     if (squaredDistance(points[left]) < pivotDist)
@@ -513,7 +508,7 @@ void Closest::shift(node zero, node point) {
     // change coordinate system:
     // u = x - xZero;
     // v = y - yZero;
-
+    
     point.lat = point.lat - zero.lat;
     point.lon = point.lon - zero.lon;
 }
