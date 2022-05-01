@@ -1,9 +1,10 @@
 #include "grid.hpp"
-#include "solar.hpp"
 
 Grid::Grid() = default;
 
-Grid::Grid(std::vector<way> &ArrOfWays, double gridStep) : waysArr{ArrOfWays}, step{gridStep} {
+Grid::Grid(std::vector<Way> ArrOfWays, double gridStep) : waysArr{std::move(ArrOfWays)}, step{gridStep} {
+    std::cout << "Fill the grid with shadows... ";
+
     min_lat = 90;
     max_lat = -90;
     min_lon = 180;
@@ -32,6 +33,10 @@ Grid::Grid(std::vector<way> &ArrOfWays, double gridStep) : waysArr{ArrOfWays}, s
         std::vector<double> temp(n_x, 0);
         grid.push_back(temp);
     }
+
+    fillIn();
+
+    std::cout << "done: " << n_x << "×" << n_y << std::endl;
 }
 
 double Grid::getColor(iPnt p) {
@@ -46,6 +51,17 @@ void Grid::plotPnts(const std::vector<iPnt> &points) {
     for (auto p: points)
         plot(p);
 }
+
+iPnt Grid::pntToPnt(double lat, double lon) const {
+    int y = (int) ((lat - min_lat) / dlat);
+    int x = (int) ((lon - min_lon) / dlon);
+
+    y = std::min(y, n_y - 1);
+    x = std::min(x, n_x - 1);
+
+    return {x, y};
+}
+
 
 std::vector<iPnt> Grid::pntsUnderLineLow(iPnt p1, iPnt p2) {
     int dx = abs(p1.x - p2.x);
@@ -134,10 +150,12 @@ void Grid::_fillIn(int start_ind, int final_ind) {
     for (int j = start_ind; j < final_ind; j++) {
         auto temp_way = waysArr[j];
 
-        double dlat_shadow = (-height / EarthPerimeter * 360 * std::stoi(temp_way.tags["levels"])
-                              * cos(to_rad(azim)) / tan(to_rad(elev)));
-        double dlon_shadow = (-height / EarthPerimeter * 360 * std::stoi(temp_way.tags["levels"])
-                              * sin(to_rad(azim)) / tan(to_rad(elev)));
+        int levels = 1;
+        if (temp_way.tags.find("levels") != temp_way.tags.end())
+            levels = std::stoi(temp_way.tags["levels"]);
+
+        double dlat_shadow = (-height / EarthPerimeter * 360 * levels * cos(to_rad(azim)) / tan(to_rad(elev)));
+        double dlon_shadow = (-height / EarthPerimeter * 360 * levels * sin(to_rad(azim)) / tan(to_rad(elev)));
 
         int dx_shadow = (int) round(dlat_shadow / dlat);
         int dy_shadow = (int) round(dlon_shadow / dlon);
@@ -148,17 +166,10 @@ void Grid::_fillIn(int start_ind, int final_ind) {
             double lat2 = temp_way.seq[i].lat;
             double lon2 = temp_way.seq[i].lon;
 
-            int y1 = (int) ((lat1 - min_lat) / dlat);
-            int x1 = (int) ((lon1 - min_lon) / dlon);
-            int y2 = (int) ((lat2 - min_lat) / dlat);
-            int x2 = (int) ((lon2 - min_lon) / dlon);
+            iPnt p1 = pntToPnt(lat1, lon1);
+            iPnt p2 = pntToPnt(lat2, lon2);
 
-            y1 = std::min(y1, n_y - 1);
-            x1 = std::min(x1, n_x - 1);
-            y2 = std::min(y2, n_y - 1);
-            x2 = std::min(x2, n_x - 1);
-
-            auto marked = pntsUnderLine({x1, y1}, {x2, y2});
+            auto marked = pntsUnderLine(p1, p2);
             plotPnts(marked);
 
             for (auto p: marked) {
@@ -199,7 +210,7 @@ void Grid::fillIn(int numberOfThreads) {
     }
 }
 
-double Grid::shadowPerc(iPnt p1, iPnt p2) {
+double Grid::_shadowPerc(iPnt p1, iPnt p2) {
     auto points = pntsUnderLine(p1, p2);
 
     int shadowPoints = 0;
@@ -211,6 +222,9 @@ double Grid::shadowPerc(iPnt p1, iPnt p2) {
     return shadowPoints / (double) points.size();
 }
 
+double Grid::shadowPerc(GraphNode node1, GraphNode node2) {
+    return _shadowPerc(pntToPnt(node1.x, node1.y), pntToPnt(node2.x, node2.y));
+}
 
 [[maybe_unused]] void Grid::print_grid() {
     for (auto &row: grid) {

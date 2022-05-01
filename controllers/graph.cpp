@@ -6,67 +6,67 @@ Graph::Graph(DataBase &db) : db(db) {}
 
 Graph::~Graph() = default;
 
-graphNode Graph::getNode(uint64_t Node) {
-    return db.getNode(Node);
+GraphNode Graph::getNode(uint64_t node) {
+    return db.getNode(node);
 }
 
-double Graph::getShading(graphNode Node1, graphNode Node2) {
-    return getLength2(Node1, Node2);
+double Graph::getShading(GraphNode node1, GraphNode node2) {
+    return grid.shadowPerc(node1, node2) * getLength2(node1, node2);
 }
 
-graphShadingEdge Graph::getShadingEdge(uint64_t fineness, uint64_t Node1, uint64_t Node2) {
-    graphShadingEdge gse = {1,
-                            getShading(getNode(Node1), getNode(Node2)),
-                            getLength2(getNode(Node1), getNode(Node2)),
-                            Node2,
-                            Node1};
+GraphShadingEdge Graph::getShadingEdge(uint64_t fineness, uint64_t node1, uint64_t node2) {
+    GraphShadingEdge gse = {1,
+                            getShading(getNode(node1), getNode(node2)),
+                            getLength2(getNode(node1), getNode(node2)),
+                            node2,
+                            node1};
     return gse;
 }
 
-std::vector<weightNode> Graph::getAdjacencyMatrix(uint64_t Node) {
-    std::vector<weightNode> weightNodeArr;
-    for (auto adjacentNode: adjacencyMatrix[Node]) {
+std::vector<WeightNode> Graph::getAdjacencyMatrix(uint64_t node) {
+    std::vector<WeightNode> weightNodeArr;
+    for (auto adjacentNode: adjacencyMatrix[node]) {
         weightNodeArr.push_back({adjacentNode, 1});
     }
 
     return weightNodeArr;
 }
 
-double Graph::getLength2(graphNode Node1, graphNode Node2) {
+double Graph::getLength2(GraphNode node1, GraphNode node2) {
     return 111200 * 180 / M_PI *
-           acos(sin(Node1.x * M_PI / 180) * sin(Node2.x * M_PI / 180) +
-                cos(Node1.x * M_PI / 180) * cos(Node2.x * M_PI / 180) *
-                cos(Node2.y * M_PI / 180 - Node1.y * M_PI / 180));
+           acos(sin(node1.x * M_PI / 180) * sin(node2.x * M_PI / 180) +
+                cos(node1.x * M_PI / 180) * cos(node2.x * M_PI / 180) *
+                cos(node2.y * M_PI / 180 - node1.y * M_PI / 180));
 }
 
 double
-Graph::getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
+Graph::getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t edgeNode, double fineness) {
     // -O(exp(x^2))
-    double ans = std::min(std::exp(getLength2(getNode(startNode), getNode(EdgeNode)) / fineness),
-                          std::exp(getLength2(getNode(endNode), getNode(EdgeNode))) / fineness);
+    double ans = std::min(std::exp(getLength2(getNode(startNode), getNode(edgeNode)) / fineness),
+                          std::exp(getLength2(getNode(endNode), getNode(edgeNode))) / fineness);
     //return std::min(ans, 100.0);
     return 1.0;
 }
 
 double Graph::getEdgeWeight(double shading, double length,
-                            uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness) {
-    return (shading + 0.1 * length) * getRemotenessWeight(startNode, endNode, EdgeNode, fineness);
+                            uint64_t startNode, uint64_t endNode, uint64_t edgeNode, double fineness) {
+    return (shading + 0.1 * length) * getRemotenessWeight(startNode, endNode, edgeNode, fineness);
 }
 
 
-graphRoute Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation) {
+GraphRoute Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation) {
     uint64_t startNode = db.closestNode(fromLocation);
     uint64_t endNode = db.closestNode(toLocation);
 
     adjacencyMatrix = db.getAdjacencyMatrixFull(startNode, endNode);
-//    grid = Grid(db.buildings_receive())
+    grid = Grid(db.buildings_receive(fromLocation, toLocation), 1);
 
     std::cout << "Making the route... ";
 
     minimumsSet minSet;
     usedSet usedSet;
     valueSet valueSet;
-    graphRoute ans;
+    GraphRoute ans;
     minSet.update(startNode, 0, 0, 0);
     valueSet.update(startNode, 0, 0, 0);
     usedSet.update(0, 0);
@@ -87,7 +87,7 @@ graphRoute Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<s
             break;
         }
         for (auto &e: getAdjacencyMatrix(el.nodeIndex)) {
-            graphShadingEdge curEdge = getShadingEdge(e.fineness, el.nodeIndex, e.index);
+            GraphShadingEdge curEdge = getShadingEdge(e.fineness, el.nodeIndex, e.index);
             double new_length = el.key +
                                 getEdgeWeight(curEdge.shading, curEdge.length, startNode, endNode, curEdge.node,
                                               trans_finesness[curEdge.fineness]);
