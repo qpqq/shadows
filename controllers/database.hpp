@@ -161,7 +161,7 @@ public:
      * @param n number of digits after the decimal iPnt
      * @return string
      */
-    static std::string toStringWithPrecision(double x, int n = 10);
+    static std::string toStringWithPrecision(double x, int n = 15);
 
     /**
      * Calculates the boundary coordinates

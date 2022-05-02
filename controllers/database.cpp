@@ -323,7 +323,7 @@ uint64_t DataBase::closestNode(const std::vector<std::string> &coords) {
     std::string query, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
     std::vector<Node> points;
     Node mid_node;
-    double radius = 0.00015625; // 1.0 km
+    double radius = 0.00015625; // 1.0 km TODO EarthRadius
     double delta = 0.00015625; // 1.0 km
     unsigned int i;
 
@@ -457,7 +457,7 @@ void Request::data(unsigned long long int &ret, int col_id) {
 }
 
 void Request::data(double &ret, int col_id) {
-    ret = sqlite3_column_double(stmt, col_id);
+    ret = sqlite3_column_double(stmt, col_id); // TODO precision
 }
 
 void Request::data(std::string &ret, int col_id) {
