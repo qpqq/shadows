@@ -1,5 +1,4 @@
 #include <drogon/drogon.h>
-#include "controllers/database.hpp"
 
 int main() {
     //Set HTTP listener address and port
