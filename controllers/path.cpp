@@ -293,8 +293,12 @@ struct valueSet {
 };
 
 static std::vector<double> trans_finesness = {
-        10,
-        50,
-        100,
-        500
+        1, //very low priority      0
+        5, //low priority           1
+        10, //lower priority        2
+        100, //common road          3
+        500, //higher priority      4
+        1000, //high priority       5
+        5000, //very high priority   6
+        50, //common road          7 l-c priority
 };
