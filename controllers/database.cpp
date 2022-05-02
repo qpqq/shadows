@@ -457,7 +457,7 @@ void Request::data(unsigned long long int &ret, int col_id) {
 }
 
 void Request::data(double &ret, int col_id) {
-    ret = sqlite3_column_double(stmt, col_id); // TODO precision
+    ret = sqlite3_column_double(stmt, col_id);
 }
 
 void Request::data(std::string &ret, int col_id) {
