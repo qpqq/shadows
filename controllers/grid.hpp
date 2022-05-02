@@ -51,7 +51,7 @@ private:
 
     double height = 3;
 
-    double elev = 1, azim = 180;
+    double elev = 0.1, azim = 0;
 
     std::vector<std::vector<double>> grid;
 

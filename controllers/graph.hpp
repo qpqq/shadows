@@ -23,7 +23,7 @@ private:
     std::vector<GraphNode> nodes;
     std::map<uint64_t, std::vector<uint64_t>> adjacencyMatrix;
 
-    double EarthRadius = 63781000;
+    double EarthRadius = 6378100;
 
 public:
 

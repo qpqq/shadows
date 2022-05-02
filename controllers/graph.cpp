@@ -9,7 +9,7 @@ GraphNode Graph::getNode(uint64_t node) {
 }
 
 double Graph::getShading(GraphNode node1, GraphNode node2) {
-    return grid.shadowPerc(node1, node2) * getLength2(node1, node2);
+    return (1 - grid.shadowPerc(node1, node2)) * getLength2(node1, node2);
 }
 
 GraphShadingEdge Graph::getShadingEdge(uint64_t fineness, uint64_t node1, uint64_t node2) {
@@ -37,8 +37,7 @@ double Graph::getLength2(GraphNode node1, GraphNode node2) {
                 cos(node2.y * M_PI / 180 - node1.y * M_PI / 180));
 }
 
-double
-Graph::getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t edgeNode, double fineness) {
+double Graph::getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t edgeNode, double fineness) {
     // -O(exp(x^2))
     double ans = std::min(std::exp(getLength2(getNode(startNode), getNode(edgeNode)) / fineness),
                           std::exp(getLength2(getNode(endNode), getNode(edgeNode))) / fineness);
@@ -57,7 +56,7 @@ Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string>
     uint64_t startNode = db.closestNode(fromLocation);
     uint64_t endNode = db.closestNode(toLocation);
 
-    double offset = 500;
+    double offset = 5000;
     offset /= EarthRadius;
     adjacencyMatrix = db.getAdjacencyMatrixFull(fromLocation, toLocation, offset);
     grid = Grid({fromLocation, toLocation}, offset, db.buildingsReceive(fromLocation, toLocation, offset), 1);
