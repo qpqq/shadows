@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 project(shadows CXX C)
 
-add_compile_options(-lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
-add_definitions(-lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS")
+#add_compile_options(-lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
+#add_definitions(-lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS")
 
 include(CheckIncludeFileCXX)
 
@@ -39,7 +39,7 @@ add_executable(${PROJECT_NAME}
         controllers/path.cpp
         )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -O3)
+target_compile_options(${PROJECT_NAME} PRIVATE -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS -O3)
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
