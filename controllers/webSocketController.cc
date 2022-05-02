@@ -41,7 +41,7 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
                 sendRoot["routeCoords"][i] = routeCoordN;
             }
         } else
-            sendRoot["routeCoords"] = ' ';
+            sendRoot["routeCoords"] = 727;
 
         Json::StreamWriterBuilder builder;
         std::string resRouteCoords = Json::writeString(builder, sendRoot);
