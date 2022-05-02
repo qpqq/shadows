@@ -532,7 +532,7 @@ double Closest::squaredDistance(Node &point) {
     return point.lat * point.lat + point.lon * point.lon;
 }
 
-void Closest::shift(Node &zero, std::vector<Node> points) {
+void Closest::shift(Node &zero, std::vector<Node> &points) {
     // change coordinate system:
     // u = x - xZero;
     // v = y - yZero;
