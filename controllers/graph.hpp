@@ -8,37 +8,43 @@
 #include <cstdio>
 #include <cmath>
 
+#include "path.cpp"
 #include "database.hpp"
+#include "grid.hpp"
 
 class Graph {
 
-public:
+private:
 
-    std::vector<graphShadingEdge> edges;
-    std::vector<graphNode> nodes;
+    DataBase &db;
+    Grid grid;
+
+    std::vector<GraphShadingEdge> edges;
+    std::vector<GraphNode> nodes;
     std::map<uint64_t, std::vector<uint64_t>> adjacencyMatrix;
 
-    /**
-    * Default constructor
-    */
-    Graph();
+    double EarthRadius = 6378100;
+
+public:
+
+    explicit Graph(DataBase &db);
 
     ~Graph();
 
-    graphNode getNode(DataBase &db, uint64_t Node); // -map
+    GraphNode getNode(uint64_t node); // -map
 
-    double getShading(graphNode Node1, graphNode Node2); // -shading в метрах
+    double getShading(GraphNode Node1, GraphNode Node2); // -shading в метрах
 
-    graphShadingEdge getShadingEdge(DataBase &db, uint64_t fineness, uint64_t Node1, uint64_t Node2);
+    GraphShadingEdge getShadingEdge(uint64_t fineness, uint64_t node1, uint64_t node2);
 
-    std::vector<weightNode> getAdjacencyMatrix(uint64_t Node); // -map
+    std::vector<WeightNode> getAdjacencyMatrix(uint64_t node); // -map
 
-    double getLength2(graphNode Node1, graphNode Node2);
+    double getLength2(GraphNode node1, GraphNode node2);
 
-    double getRemotenessWeight(DataBase &db, uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
+    double getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t edgeNode, double fineness);
 
-    double getEdgeWeight(DataBase &db, double shading, double length,
-                         uint64_t startNode, uint64_t endNode, uint64_t EdgeNode, double fineness);
+    double getEdgeWeight(double shading, double length,
+                         uint64_t startNode, uint64_t endNode, uint64_t edgeNode, double fineness);
 
-    graphRoute getRoute(DataBase &db, uint64_t startNode, uint64_t endNode); // -output
+    GraphRoute getRoute(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation); // -output
 };

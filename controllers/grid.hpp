@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "database.hpp"
+#include "solar.hpp"
 
 /**
  * Point on the grid
@@ -31,32 +32,34 @@ class Grid {
 
 private:
 
-    std::vector<way> &waysArr;
+    std::vector<Way> waysArr;
 
-    double step;
+    double step{};
 
-    double min_lat, max_lat;
-    double min_lon, max_lon;
+    double min_lat{}, max_lat{};
+    double min_lon{}, max_lon{};
 
-    int n_lat;
-    int n_lon;
-    int n_x;
-    int n_y;
+    int n_lat{};
+    int n_lon{};
+    int n_x{};
+    int n_y{};
 
-    double dlat;
-    double dlon;
+    double dlat{};
+    double dlon{};
+
+    double alpha = 0.01;
 
     double height = 3;
 
-    double elev = 1, azim = 120;
+    double elev = 0.1, azim = 0;
 
     std::vector<std::vector<double>> grid;
 
 public:
 
-//    Grid();
+    Grid();
 
-    Grid(std::vector<way> &ArrOfWays, double gridStep);
+    Grid(std::vector<std::vector<std::string>> coords, double offset, std::vector<Way> ArrOfWays, double gridStep);
 
     double getColor(iPnt p);
 
@@ -64,17 +67,21 @@ public:
 
     void plotPnts(const std::vector<iPnt> &points);
 
-    std::vector<iPnt> pntsUnderLineLow(iPnt p1, iPnt p2);
+    [[nodiscard]] iPnt pntToPnt(double lat, double lon) const;
 
-    std::vector<iPnt> pntsUnderLineHigh(iPnt p1, iPnt p2);
+    static std::vector<iPnt> pntsUnderLineLow(iPnt p1, iPnt p2);
 
-    std::vector<iPnt> pntsUnderLine(iPnt p1, iPnt p2);
+    static std::vector<iPnt> pntsUnderLineHigh(iPnt p1, iPnt p2);
+
+    static std::vector<iPnt> pntsUnderLine(iPnt p1, iPnt p2);
 
     void _fillIn(int start_ind, int final_ind);
 
     void fillIn(int numberOfThreads = -1);
 
-    double shadowPerc(iPnt p1, iPnt p2);
+    double _shadowPerc(iPnt p1, iPnt p2);
+
+    double shadowPerc(GraphNode node1, GraphNode node2);
 
     [[maybe_unused]] void print_grid();
 };

@@ -1,22 +1,8 @@
 #include <vector>
 #include <string>
-#include <iomanip>
 
 #include "webSocketController.h"
 #include "graph.hpp"
-
-/**
- * Converts doubles to string with the specified precision.
- * @param x double
- * @param n number of digits after the decimal iPnt
- * @return string
- */
-std::string toStringWithPrecision(double x, const int n = 10) {
-    std::ostringstream out;
-    out.precision(n);
-    out << std::fixed << x;
-    return out.str();
-}
 
 void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnPtr, std::string &&message,
                                            const WebSocketMessageType &type) {
@@ -30,20 +16,9 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
                                                recRoot["toLocation"][1].asString()}; //to location coords JSON -> cpp array convert
 
         DataBase db("../controllers/shadow.db");
-        Graph city;
+        Graph city(db);
 
-        auto startNode = db.closestNode(fromLocation[0], fromLocation[1]);
-        auto endNode = db.closestNode(toLocation[0], toLocation[1]);
-
-        std::cout << "Making the route from " << startNode << " to " << endNode << std::endl;
-
-        auto route = city.getRoute(
-                db,
-                startNode,
-                endNode);
-
-        std::cout << "Making the route from " << startNode << " to " << endNode << " done" << std::endl;
-        std::cout << "Number of vertices: " << route.Nodes.size() << std::endl;
+        auto route = city.getRoute(fromLocation, toLocation);
 
 //        double routeCoords[2][2] = {
 //                {
@@ -61,8 +36,8 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
                 Json::Value routeCoordN;
 //            routeCoordN[0] = routeCoords[i][0]; //routeCoords[i][0] -> route.coords[i].lat
 //            routeCoordN[1] = routeCoords[i][1]; //routeCoords[i][1] -> route.coords[i].lon
-                routeCoordN[0] = toStringWithPrecision(route.Nodes[i].x);
-                routeCoordN[1] = toStringWithPrecision(route.Nodes[i].y);
+                routeCoordN[0] = DataBase::toStringWithPrecision(route.Nodes[i].x);
+                routeCoordN[1] = DataBase::toStringWithPrecision(route.Nodes[i].y);
                 sendRoot["routeCoords"][i] = routeCoordN;
             }
         } else
