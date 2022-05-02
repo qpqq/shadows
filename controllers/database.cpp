@@ -403,8 +403,6 @@ DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::ve
 
     between = "lat BETWEEN " + latLow + " AND " + latHigh + " AND lon BETWEEN " + lonLeft + " AND " + lonRight;
 
-    // TODO разорвать два пути вместе
-
     query_matrix = "SELECT node_id, prev, next "
                    "FROM adjacency "
                    "WHERE " + between + ";";
