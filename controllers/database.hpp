@@ -12,39 +12,39 @@
 
 #include "sqlite/sqlite3.h"
 
-#define UNDEFINED_PATH  120 // empty string received
-#define ABANDONED       1
+#define UNDEFINED_PATH  0 // empty string received
+#define ABANDONED      1
 #define BRIDLEWAY       2
-#define BUS_STOP        3
-#define CONSTRUCTION    4
-#define CORRIDOR        5
-#define CYCLEWAY        6
-#define ELEVATOR        7
-#define FOOTWAY         8
-#define LIVING_STREET   9
-#define MOTORWAY        10
-#define PATH            11
-#define PEDESTRIAN      12
-#define PLATFORM        13
-#define PRIMARY         14
-#define PRIMARY_LINK    15
-#define PROPOSED        16
-#define RACEWAY         17
-#define RESIDENTIAL     18
-#define REST_AREA       19
-#define ROAD            20
-#define SECONDARY       21
-#define SECONDARY_LINK  22
-#define SERVICE         23
-#define STEPS           24
-#define STREET_LAMP     25
-#define TERTIARY        26
-#define TERTIARY_LINK   27
-#define TRACK           28
-#define TRUNK           29
-#define TRUNK_LINK      30
-#define UNCLASSIFIED    31
-#define VIA_FERRATA     32
+#define BUS_STOP        0
+#define CONSTRUCTION    0
+#define CORRIDOR        2
+#define CYCLEWAY        0
+#define ELEVATOR        4
+#define FOOTWAY         4
+#define LIVING_STREET   3
+#define MOTORWAY        1
+#define PATH            2
+#define PEDESTRIAN      3
+#define PLATFORM        1
+#define PRIMARY         0
+#define PRIMARY_LINK    0
+#define PROPOSED        0
+#define RACEWAY         0
+#define RESIDENTIAL     3
+#define REST_AREA       1
+#define ROAD            0
+#define SECONDARY       5
+#define SECONDARY_LINK  0
+#define SERVICE         7
+#define STEPS           7
+#define STREET_LAMP     0
+#define TERTIARY        6
+#define TERTIARY_LINK   0
+#define TRACK           1
+#define TRUNK           6
+#define TRUNK_LINK      0
+#define UNCLASSIFIED    5
+#define VIA_FERRATA     3
 
 struct Node {
     unsigned long long int id;
@@ -77,6 +77,9 @@ struct GraphShadingEdge {
 struct GraphNode {
     double x;
     double y;
+    friend bool operator== (const GraphNode& a, const GraphNode& b);
+
+    friend bool operator!= (const GraphNode& a, const GraphNode& b);
 };
 
 struct GraphRoute {

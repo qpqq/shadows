@@ -5,7 +5,10 @@ Graph::Graph(DataBase &db) : db(db) {}
 Graph::~Graph() = default;
 
 GraphNode Graph::getNode(uint64_t node) {
-    return db.getNode(node);
+    if (nodes[node] != GraphNode()) {
+        return nodes[node];
+    }
+    return nodes[node] = db.getNode(node);
 }
 
 double Graph::getShading(GraphNode node1, GraphNode node2) {
@@ -13,7 +16,7 @@ double Graph::getShading(GraphNode node1, GraphNode node2) {
 }
 
 GraphShadingEdge Graph::getShadingEdge(uint64_t fineness, uint64_t node1, uint64_t node2) {
-    GraphShadingEdge gse = {1,
+    GraphShadingEdge gse = {fineness,
                             getShading(getNode(node1), getNode(node2)),
                             getLength2(getNode(node1), getNode(node2)),
                             node2,
@@ -41,8 +44,8 @@ double Graph::getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t
     // -O(exp(x^2))
     double ans = std::min(std::exp(getLength2(getNode(startNode), getNode(edgeNode)) / fineness),
                           std::exp(getLength2(getNode(endNode), getNode(edgeNode))) / fineness);
-    //return std::min(ans, 100.0);
-    return 1.0;
+    return std::min(ans, MAX_REMOTENESS_FINE*1.0);
+    //return 1.0;
 }
 
 double Graph::getEdgeWeight(double shading, double length,
