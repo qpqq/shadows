@@ -32,6 +32,7 @@ add_executable(${PROJECT_NAME}
         controllers/database.cpp
         controllers/grid.hpp
         controllers/grid.cpp
+        controllers/solar.hpp
         controllers/solar.cpp
         sqlite/sqlite3.h
         sqlite/sqlite3.c

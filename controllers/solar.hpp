@@ -13,12 +13,12 @@ const double EarthPerimeter = 2 * M_PI * 6378 * 1000;
 /**
  * Converts degrees to radians.
  */
-double to_rad(double x);
+double toRad(double x);
 
 /**
  * Converts radians to degrees.
  */
-double to_deg(double x);
+double toDeg(double x);
 
 /**
  * Calculates the altitude and azimuth of the sun.
@@ -31,13 +31,17 @@ double to_deg(double x);
  * @param min [0, 59]
  * @param sec [0, 59]
  * @param time_zone in hours
- * @return elevation and azimuth
+ * @return elevation and azimuth respectively
  * @see https://gml.noaa.gov/grad/solcalc/
  */
 std::pair<double, double>
-solar_coord(double latit, double longit, int year, int mon, int mday, int hour, int min, int sec, double time_zone);
+solarCoords(double latit, double longit, int year, int mon, int mday, int hour, int min, int sec, double time_zone);
 
 /**
- * Some test.
+ * Returns solar coordinates at the moment
+ * @param lat latitude of the observation point
+ * @param lon longitude of the observation point
+ * @param time_zone time zone of the observation point
+ * @return elevation and azimuth respectively
  */
-[[maybe_unused]] void solar_coord_test();
+std::pair<double, double> getSolarCoords(double lat, double lon, double time_zone = 3);

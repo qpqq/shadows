@@ -15,7 +15,7 @@ Grid::Grid(std::vector<std::vector<std::string>> coords, double offset, std::vec
     max_lon = std::stod(bound[3]) * (1 + alpha / 100);
 
     double dlat_meters = (max_lat - min_lat) * (EarthPerimeter / 360);
-    double dlon_meters = (max_lon - min_lon) * (EarthPerimeter / 360) * cos(to_rad(max_lat));
+    double dlon_meters = (max_lon - min_lon) * (EarthPerimeter / 360) * cos(toRad(max_lat));
 
     n_lat = (int) ceil(dlat_meters / step);
     n_lon = (int) ceil(dlon_meters / step);
@@ -25,15 +25,26 @@ Grid::Grid(std::vector<std::vector<std::string>> coords, double offset, std::vec
     dlat = (max_lat - min_lat) / (double) n_lat;
     dlon = (max_lon - min_lon) / (double) n_lon;
 
-    for (int i = 0; i < n_y; i++) {
-        std::vector<double> temp(n_x, 0);
-        grid.push_back(temp);
+    auto solarCoords = getSolarCoords((max_lat + min_lat) / 2, (max_lon + min_lon) / 2);
+    elev = solarCoords.first;
+    azim = solarCoords.second;
+
+    if (elev <= 0) {
+        for (int i = 0; i < n_y; i++) {
+            std::vector<double> temp(n_x, 1);
+            grid.push_back(temp);
+        }
+    } else {
+        for (int i = 0; i < n_y; i++) {
+            std::vector<double> temp(n_x, 0);
+            grid.push_back(temp);
+        }
+
+        fillIn();
     }
 
-//    _fillIn(0, (int) waysArr.size());
-    fillIn();
-
-    std::cout << "done: " << n_x << "×" << n_y << std::endl;
+    std::cout << "done: " << n_x << "×" << n_y
+              << ", elev = " << elev << ", azim = " << azim << std::endl;
 }
 
 double Grid::getColor(iPnt p) {
@@ -156,8 +167,8 @@ void Grid::_fillIn(int start_ind, int final_ind) {
         if (temp_way.tags.find("levels") != temp_way.tags.end())
             levels = std::stoi(temp_way.tags["levels"]);
 
-        double dlat_shadow = (-height / EarthPerimeter * 360 * levels * cos(to_rad(azim)) / tan(to_rad(elev)));
-        double dlon_shadow = (-height / EarthPerimeter * 360 * levels * sin(to_rad(azim)) / tan(to_rad(elev)));
+        double dlat_shadow = (-height / EarthPerimeter * 360 * levels * cos(toRad(azim)) / tan(toRad(elev)));
+        double dlon_shadow = (-height / EarthPerimeter * 360 * levels * sin(toRad(azim)) / tan(toRad(elev)));
 
         int dx_shadow = (int) round(dlat_shadow / dlat);
         int dy_shadow = (int) round(dlon_shadow / dlon);
