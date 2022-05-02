@@ -322,10 +322,13 @@ uint64_t DataBase::closestNode(const std::vector<std::string> &coords) {
 
     std::string query, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
     std::vector<Node> points;
-    Node mid_node;
+    Node mid_node, zero;
     double radius = 0.00015625; // 1.0 km TODO EarthRadius
     double delta = 0.00015625; // 1.0 km
     unsigned int i;
+
+    zero.lat = std::stod(lat);
+    zero.lon = std::stod(lon);
 
     mid_node.id = 0;
     mid_node.lat = -1.0;
@@ -375,6 +378,7 @@ uint64_t DataBase::closestNode(const std::vector<std::string> &coords) {
     std::vector<Node> result;
     Closest finder;
 
+    finder.shift(zero, points);
     result = finder.kClosest(points, 1);
 
     std::cout << "done: " << result[0].id << std::endl;
@@ -415,13 +419,15 @@ DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::ve
         req_matrix.data(mid_mate.next, 2);
 
         if (mid_mate.prev != 0) {
-            if (std::find(begin(dict[mid_mate.id]), end(dict[mid_mate.id]), mid_mate.prev) == std::end(dict[mid_mate.id])) {
+            if (std::find(begin(dict[mid_mate.id]), end(dict[mid_mate.id]), mid_mate.prev) ==
+                std::end(dict[mid_mate.id])) {
                 dict[mid_mate.id].push_back(mid_mate.prev);
             }
         }
 
         if (mid_mate.next != 0) {
-            if (std::find(begin(dict[mid_mate.id]), end(dict[mid_mate.id]), mid_mate.next) == std::end(dict[mid_mate.id])) {
+            if (std::find(begin(dict[mid_mate.id]), end(dict[mid_mate.id]), mid_mate.next) ==
+                std::end(dict[mid_mate.id])) {
                 dict[mid_mate.id].push_back(mid_mate.next);
             }
         }
@@ -526,11 +532,13 @@ double Closest::squaredDistance(Node &point) {
     return point.lat * point.lat + point.lon * point.lon;
 }
 
-void Closest::shift(Node zero, Node point) {
+void Closest::shift(Node &zero, std::vector<Node> points) {
     // change coordinate system:
     // u = x - xZero;
     // v = y - yZero;
 
-    point.lat = point.lat - zero.lat;
-    point.lon = point.lon - zero.lon;
+    for (auto &point: points) {
+        point.lat = point.lat - zero.lat;
+        point.lon = point.lon - zero.lon;
+    }
 }

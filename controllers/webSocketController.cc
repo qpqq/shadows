@@ -38,7 +38,7 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
 //            routeCoordN[1] = routeCoords[i][1]; //routeCoords[i][1] -> route.coords[i].lon
                 routeCoordN[0] = DataBase::toStringWithPrecision(route.Nodes[i].x);
                 routeCoordN[1] = DataBase::toStringWithPrecision(route.Nodes[i].y);
-                sendRoot["routeCoords"][i] = routeCoordN;
+                sendRoot["routeCoords"][(int) route.Nodes.size() - 1 - i] = routeCoordN; // TODO почему в обратном порядке
             }
         } else
             sendRoot["routeCoords"] = 727;

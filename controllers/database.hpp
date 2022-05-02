@@ -237,8 +237,6 @@ private:
 
     double squaredDistance(Node &point);
 
-    void shift(Node zero, Node point);
-
 public:
 
     Closest();
@@ -246,4 +244,6 @@ public:
     ~Closest();
 
     std::vector<Node> kClosest(std::vector<Node> &points, int k);
+
+    void shift(Node &zero, std::vector<Node> point);
 };
