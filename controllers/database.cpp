@@ -27,6 +27,14 @@ if the query returns an integer but the sqlite3_column_text() interface is used 
 
 */
 
+bool operator== (const GraphNode& a, const GraphNode& b) {
+    return (a.x == b.x) && (a.y == b.y);
+}
+
+bool operator!= (const GraphNode& a, const GraphNode& b) {
+    return !(a == b);
+}
+
 DataBase::DataBase() = default;
 
 DataBase::DataBase(const std::string &path) {
