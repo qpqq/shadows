@@ -27,7 +27,14 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
 
         if (!route.nodes.empty()) {
             for (int i = 0; i < route.nodes.size(); i++) {
-                Json::Value routeCoordN;
+                Json::Value routeCoordN, routeShadingN;
+
+                if(i < route.nodes.size() - 1){
+                   routeShadingN = DataBase::toStringWithPrecision(route.shading[i]);
+                   sendRoote["routeShading"][(int) route.nodes.size() - 1 - i] = routeShadingN; 
+                }
+                
+
                 routeCoordN[0] = DataBase::toStringWithPrecision(route.nodes[i].x);
                 routeCoordN[1] = DataBase::toStringWithPrecision(route.nodes[i].y);
                 sendRoot["routeCoords"][(int) route.nodes.size() - 1 - i] = routeCoordN;

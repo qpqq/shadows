@@ -8,7 +8,7 @@ ymaps.ready(function () {
     var geolocation = myMap.controls.get('geolocationControl');
     myMap.options.set('dragCursor', 'pointer');
 
-    var lastRoute, plc, preset;
+    var plc, preset;
 
 
     var toLocationInput = document.getElementById('toLocation');
@@ -102,6 +102,13 @@ ymaps.ready(function () {
 
     var fromToLocations = [];
 
+    var notiClose = document.getElementsByClassName("notiClose")[0],
+        noti = document.getElementsByClassName("noti")[0];
+    notiClose.onclick = function () {
+        noti.classList.add("notiPopout");
+        noti.classList.remove("notiPopup")
+    }
+
     var loader = document.getElementById("loader");
 
     const connection = new WebSocket("ws://localhost/echo");
@@ -124,36 +131,50 @@ ymaps.ready(function () {
         if (e.data != "") {
             routeCoords = JSON.parse(e.data);
             if(routeCoords["routeCoords"] == 727){
-                alert("Маршрут не может быть построен");
-                 loader.style.display = "none";
+                
+                loader.style.display = "none";
+                noti.classList.remove("notiPopout");
+                noti.classList.add("notiPopup")
             }
             else{
                 myMap.geoObjects.removeAll();
                 for(let i = 0; i < routeCoords["routeCoords"].length; i++){
                     if(i == 0){
-                        preset = 'islands#blueCircleIcon';
+                        preset = 'islands#blueCircleDotIcon';
                     }
                     else if(i == routeCoords["routeCoords"].length-1){
-                        preset = 'islands#redCircleIcon'
+                        preset = 'islands#redCircleDotIcon'
                     }
                     else{
-                        preset = 'islands#darkBlueCircleIcon'
+                        preset = 'islands#darkBlueCircleDotIcon'
                     }
-                    plc = createRoutePlacemark(routeCoords["routeCoords"], i, preset);
-                    myMap.geoObjects.add(plc);
+                    // !!!ТОЧКИ!!!
+                    //plc = createRoutePlacemark(routeCoords["routeCoords"], i, preset);
+                    //myMap.geoObjects.add(plc);
+                    if(i < routeCoords["routeCoords"].length-1){
+                        var route = new ymaps.Polyline([
+                            routeCoords["routeCoords"][i],
+                            routeCoords["routeCoords"][i+1]
+                            ] ,{},
+                            {
+                                strokeWidth: '15',
+                                strokeColor: getColorFromShading(routeCoords["routeShading"][i])
+                        });
+                    }
+                    myMap.geoObjects.add(route);
                 }
 
-                let route = new ymaps.Polyline(routeCoords["routeCoords"], {
-                    mapStateAutoApply: true
-                }, {
-                    strokeWidth: '5',
+                /*let route = new ymaps.Polyline(routeCoords["routeCoords"], {},
+                {
+                    strokeWidth: '15',
                     strokeColor: '#0066ff',
-                })
-                lastRoute = route;
-                myMap.geoObjects.add(placemark1); myMap.geoObjects.add(placemark2);
+                })*/
+
+                myMap.geoObjects.add(placemark1).add(placemark2);
                 placemark1 = placemark2 = null;
-                myMap.geoObjects.add(route);
+                //myMap.geoObjects.add(route);
                 loader.style.display = "none";
+                console.log(routeCoords)
             }
             /*
             let route = new ymaps.multiRouter.MultiRoute({
@@ -205,6 +226,7 @@ ymaps.ready(function () {
         this.textContent = disableAutoSwap ? "Enable AutoSwap" : "Disable AutoSwap";
     }
 
+
     function createPlacemark(coords) {
         return new ymaps.Placemark(coords, {
             iconCaption: 'поиск...'
@@ -233,10 +255,33 @@ ymaps.ready(function () {
 
     function createRoutePlacemark(routeCoords, i, preset){
         return new ymaps.Placemark(routeCoords[i], {
-            iconContent: i
         }, {
             preset: preset
         })
+    }
+
+
+    function getRandomColor() {
+      let letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    function getColorFromShading(routeShading){
+        if(routeShading >= 0 && routeShading < .2){
+            return "#0066ff"
+        }else if(routeShading >= .2 && routeShading < .4){
+            return "#5297C6"
+        }else if(routeShading >= .4 && routeShading < .6){
+            return "#85B6A2"
+        }else if(routeShading >= .6 && routeShading < .8){
+            return "#BBD67D"
+        }else{
+            return "#FFFF4D"
+        }
     }
 });
 
