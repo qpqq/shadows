@@ -31,7 +31,7 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
 
                 if(i < route.nodes.size() - 1){
                    routeShadingN = DataBase::toStringWithPrecision(route.shading[i]);
-                   sendRoote["routeShading"][(int) route.nodes.size() - 1 - i] = routeShadingN; 
+                   sendRoot["routeShading"][(int) route.nodes.size() - 1 - i] = routeShadingN;
                 }
                 
 
