@@ -190,9 +190,9 @@ void Grid::_fillIn(int startInd, int endInd) {
     for (int j = startInd; j < endInd; j++) {
         auto temp_way = waysArr[j];
 
-        int levels = defaultLevel;
+        double levels = defaultLevel;
         if (temp_way.tags.find("levels") != temp_way.tags.end())
-            levels = std::stoi(temp_way.tags["levels"]);
+            levels = std::stod(temp_way.tags["levels"]);
 
         double dlat_shadow = (-height / EarthPerimeter * 360 * levels * cos(toRad(azim)) / tan(toRad(elev)));
         double dlon_shadow = (-height / EarthPerimeter * 360 * levels * sin(toRad(azim)) / tan(toRad(elev)));
