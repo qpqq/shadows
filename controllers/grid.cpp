@@ -190,7 +190,7 @@ void Grid::_fillIn(int startInd, int endInd) {
     for (int j = startInd; j < endInd; j++) {
         auto temp_way = waysArr[j];
 
-        int levels = 1;
+        int levels = defaultLevel;
         if (temp_way.tags.find("levels") != temp_way.tags.end())
             levels = std::stoi(temp_way.tags["levels"]);
 

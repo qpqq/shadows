@@ -49,6 +49,7 @@ private:
 
     double offsetOffset = 1000 * 360 / EarthPerimeter;
 
+    double defaultLevel = 3;
     double height = 3;
 
     double elev{}, azim{};
