@@ -27,9 +27,9 @@ Grid::Grid(std::vector<std::vector<std::string>> coords, double offset, std::vec
 
     auto solarCoords = getSolarCoords((max_lat + min_lat) / 2, (max_lon + min_lon) / 2);
     elev = solarCoords.first;
-//    elev = 31.5068;
+//    elev = 20;
     azim = solarCoords.second;
-//    azim = 250.453;
+//    azim = 270;
 
     grid = std::vector<std::vector<double>>(n_y);
 
@@ -195,8 +195,8 @@ void Grid::_fillIn(int startInd, int endInd) {
         if (temp_way.tags.find("levels") != temp_way.tags.end())
             levels = std::stod(temp_way.tags["levels"]);
 
-        double dlat_shadow = (-height / EarthPerimeter * 360 * levels * cos(toRad(azim)) / tan(toRad(elev)));
-        double dlon_shadow = (-height / EarthPerimeter * 360 * levels * sin(toRad(azim)) / tan(toRad(elev)));
+        double dlon_shadow = (-height / EarthPerimeter * 360 * levels * cos(toRad(azim)) / tan(toRad(elev)));
+        double dlat_shadow = (-height / EarthPerimeter * 360 * levels * sin(toRad(azim)) / tan(toRad(elev)));
 
         int dx_shadow = (int) round(dlat_shadow / dlat);
         int dy_shadow = (int) round(dlon_shadow / dlon);
