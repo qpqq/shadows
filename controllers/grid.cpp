@@ -9,13 +9,13 @@ Grid::Grid(std::vector<std::vector<std::string>> coords, double offset, std::vec
     std::cout.flush();
 
     auto bound = DataBase::boundaries(coords, offset);
-    min_lat = std::stod(bound[0]) * (1 - alpha / 100);
-    max_lat = std::stod(bound[1]) * (1 + alpha / 100);
-    min_lon = std::stod(bound[2]) * (1 - alpha / 100);
-    max_lon = std::stod(bound[3]) * (1 + alpha / 100);
+    min_lat = std::stod(bound[0]) - offsetOffset;
+    max_lat = std::stod(bound[1]) + offsetOffset;
+    min_lon = std::stod(bound[2]) - offsetOffset;
+    max_lon = std::stod(bound[3]) + offsetOffset;
 
     double dlat_meters = (max_lat - min_lat) * (EarthPerimeter / 360);
-    double dlon_meters = (max_lon - min_lon) * (EarthPerimeter / 360) * cos(toRad(max_lat));
+    double dlon_meters = (max_lon - min_lon) * (EarthPerimeter / 360);
 
     n_lat = (int) ceil(dlat_meters / step);
     n_lon = (int) ceil(dlon_meters / step);
@@ -27,6 +27,7 @@ Grid::Grid(std::vector<std::vector<std::string>> coords, double offset, std::vec
 
     auto solarCoords = getSolarCoords((max_lat + min_lat) / 2, (max_lon + min_lon) / 2);
     elev = solarCoords.first;
+//    elev = 1;
     azim = solarCoords.second;
 
     if (elev <= 0) {

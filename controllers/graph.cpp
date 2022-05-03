@@ -59,10 +59,11 @@ Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string>
     uint64_t startNode = db.closestNode(fromLocation);
     uint64_t endNode = db.closestNode(toLocation);
 
-    double offset = 5000;
-    offset /= EarthRadius;
+    double offset = 1000;
+    offset *= 180 / M_PI / EarthRadius;
     adjacencyMatrix = db.getAdjacencyMatrixFull(fromLocation, toLocation, offset);
     grid = Grid({fromLocation, toLocation}, offset, db.buildingsReceive(fromLocation, toLocation, offset), 3);
+//    grid.print_grid();
 
     std::cout << "Making the route... ";
     std::cout.flush();

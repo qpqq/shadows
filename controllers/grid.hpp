@@ -47,7 +47,7 @@ private:
     double dlat{};
     double dlon{};
 
-    double alpha = 0.01;
+    double offsetOffset = 300 * 360 / EarthPerimeter;
 
     double height = 3;
 

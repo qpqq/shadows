@@ -99,6 +99,10 @@ std::vector<std::string> DataBase::boundaries(const std::vector<std::vector<std:
 
 std::vector<Way>
 DataBase::buildingsReceive(std::vector<std::string> &coords1, std::vector<std::string> &coords2, double offset) {
+
+    std::cout << "Selecting ways by coordinates... ";
+    std::cout.flush();
+
     std::string latLow, latHigh, lonLeft, lonRight;
 
     auto bound = boundaries({coords1, coords2}, offset);
@@ -135,8 +139,6 @@ DataBase::buildingsReceive(std::vector<std::string> &coords1, std::vector<std::s
     Request req_ways(*this, query);
 
 //    std::cout << "Selecting ways by coordinates: ";
-    std::cout << "Selecting ways by coordinates... ";
-    std::cout.flush();
 
     while (req_ways.step() != SQLITE_DONE) {
         req_ways.data(mid_way.id, 0);
