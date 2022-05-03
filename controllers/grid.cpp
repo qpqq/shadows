@@ -30,17 +30,14 @@ Grid::Grid(std::vector<std::vector<std::string>> coords, double offset, std::vec
 //    elev = 1;
     azim = solarCoords.second;
 
-    if (elev <= 0) {
-        for (int i = 0; i < n_y; i++) {
-            std::vector<double> temp(n_x, 1);
-            grid.push_back(temp);
-        }
-    } else {
-        for (int i = 0; i < n_y; i++) {
-            std::vector<double> temp(n_x, 0);
-            grid.push_back(temp);
-        }
+    grid = std::vector<std::vector<double>>(n_y);
 
+    if (elev <= 0)
+        makeGrid(1);
+    else {
+        makeGrid(0);
+
+//        _fillIn(0, (int) waysArr.size());
         fillIn();
     }
 
@@ -160,8 +157,37 @@ std::vector<iPnt> Grid::pntsUnderLine(iPnt p1, iPnt p2) {
     return pntsUnderLineHigh(p1, p2);
 }
 
-void Grid::_fillIn(int start_ind, int final_ind) {
-    for (int j = start_ind; j < final_ind; j++) {
+void Grid::_makeGrid(int startInd, int endInd, double color) {
+    for (int i = startInd; i < endInd; i++)
+        grid[i] = std::vector<double>(n_x, color);
+}
+
+void Grid::makeGrid(double color, int numberOfThreads) {
+    if (numberOfThreads == -1) {
+        numberOfThreads = (int) std::thread::hardware_concurrency(); // number of processor threads
+        if (numberOfThreads == 0)
+            numberOfThreads = 8;
+    }
+
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < numberOfThreads; i++) {
+        int startInd = i * (int) grid.size() / numberOfThreads;
+        int endInd = (i + 1) * (int) grid.size() / numberOfThreads;
+
+        if (i == numberOfThreads - 1)
+            endInd = (int) grid.size();
+
+        threads.emplace_back(&Grid::_makeGrid, this, startInd, endInd, color);
+    }
+
+    for (auto &t: threads) {
+        t.join();
+    }
+}
+
+void Grid::_fillIn(int startInd, int endInd) {
+    for (int j = startInd; j < endInd; j++) {
         auto temp_way = waysArr[j];
 
         int levels = 1;
@@ -210,13 +236,13 @@ void Grid::fillIn(int numberOfThreads) {
     std::vector<std::thread> threads;
 
     for (int i = 0; i < numberOfThreads; i++) {
-        int start_ind = i * (int) waysArr.size() / numberOfThreads;
-        int final_ind = (i + 1) * (int) waysArr.size() / numberOfThreads;
+        int startInd = i * (int) waysArr.size() / numberOfThreads;
+        int endInd = (i + 1) * (int) waysArr.size() / numberOfThreads;
 
         if (i == numberOfThreads - 1)
-            final_ind = (int) waysArr.size();
+            endInd = (int) waysArr.size();
 
-        threads.emplace_back(&Grid::_fillIn, this, start_ind, final_ind);
+        threads.emplace_back(&Grid::_fillIn, this, startInd, endInd);
     }
 
     for (auto &t: threads) {

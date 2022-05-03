@@ -34,7 +34,7 @@ add_executable(${PROJECT_NAME}
         controllers/path.cpp
         )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS -O3)
+target_compile_options(${PROJECT_NAME} PRIVATE -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method

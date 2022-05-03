@@ -75,7 +75,11 @@ public:
 
     static std::vector<iPnt> pntsUnderLine(iPnt p1, iPnt p2);
 
-    void _fillIn(int start_ind, int final_ind);
+    void _makeGrid(int startInd, int endInd, double color);
+
+    void makeGrid(double color, int numberOfThreads = -1);
+
+    void _fillIn(int startInd, int endInd);
 
     void fillIn(int numberOfThreads = -1);
 
