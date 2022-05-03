@@ -27,8 +27,9 @@ Grid::Grid(std::vector<std::vector<std::string>> coords, double offset, std::vec
 
     auto solarCoords = getSolarCoords((max_lat + min_lat) / 2, (max_lon + min_lon) / 2);
     elev = solarCoords.first;
-//    elev = 1;
+//    elev = 31.5068;
     azim = solarCoords.second;
+//    azim = 250.453;
 
     grid = std::vector<std::vector<double>>(n_y);
 
