@@ -15,6 +15,9 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
         std::vector<std::string> toLocation = {recRoot["toLocation"][0].asString(),
                                                recRoot["toLocation"][1].asString()}; //to location coords JSON -> cpp array convert
 
+        std::cout << "[" << fromLocation[0] << ", " << fromLocation[1] << "] --> "
+                  << "[" << toLocation[0] << ", " << toLocation[1] << "]" << std::endl;
+
         DataBase db("../controllers/shadow.db");
         Graph city(db);
 
@@ -38,7 +41,8 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
 //            routeCoordN[1] = routeCoords[i][1]; //routeCoords[i][1] -> route.coords[i].lon
                 routeCoordN[0] = DataBase::toStringWithPrecision(route.Nodes[i].x);
                 routeCoordN[1] = DataBase::toStringWithPrecision(route.Nodes[i].y);
-                sendRoot["routeCoords"][(int) route.Nodes.size() - 1 - i] = routeCoordN; // TODO почему в обратном порядке
+                sendRoot["routeCoords"][(int) route.Nodes.size() - 1 -
+                                        i] = routeCoordN; // TODO почему в обратном порядке
             }
         } else
             sendRoot["routeCoords"] = 727;

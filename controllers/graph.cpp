@@ -82,7 +82,7 @@ Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string>
 
         if (el.nodeIndex == endNode) {
             uint64_t node = endNode;
-            ans.shading = el.value;
+//            ans.shading = el.value;
             while (node != startNode) {
                 valueSet::valueSetElement route_el = valueSet.get(node);
                 ans.Nodes.push_back(getNode(route_el.nodeIndex));

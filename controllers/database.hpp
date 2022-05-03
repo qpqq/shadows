@@ -13,7 +13,7 @@
 #include "sqlite/sqlite3.h"
 
 #define UNDEFINED_PATH  0 // empty string received
-#define ABANDONED      1
+#define ABANDONED       1
 #define BRIDLEWAY       2
 #define BUS_STOP        0
 #define CONSTRUCTION    0
@@ -77,14 +77,15 @@ struct GraphShadingEdge {
 struct GraphNode {
     double x;
     double y;
-    friend bool operator== (const GraphNode& a, const GraphNode& b);
 
-    friend bool operator!= (const GraphNode& a, const GraphNode& b);
+    friend bool operator==(const GraphNode &a, const GraphNode &b);
+
+    friend bool operator!=(const GraphNode &a, const GraphNode &b);
 };
 
 struct GraphRoute {
     std::vector<GraphNode> Nodes;
-    double shading;
+    std::vector<double> shading;
 };
 
 struct WeightNode {
