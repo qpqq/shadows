@@ -23,27 +23,15 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
 
         auto route = city.getRoute(fromLocation, toLocation);
 
-//        double routeCoords[2][2] = {
-//                {
-//                        std::stof(recRoot["fromLocation"][0].asString()),
-//                        std::stof(recRoot["fromLocation"][1].asString())},
-//                {
-//                        std::stof(recRoot["toLocation"][0].asString()),
-//                        std::stof(recRoot["toLocation"][1].asString())}};
-
         Json::Value sendRoot;
 
-        if (!route.Nodes.empty()) {
-//        for (int i = 0; i < 2; i++) { //2 -> route.coords.size()
-            for (int i = 0; i < route.Nodes.size(); i++) {
+        if (!route.nodes.empty()) {
+            for (int i = 0; i < route.nodes.size(); i++) {
                 Json::Value routeCoordN;
-//            routeCoordN[0] = routeCoords[i][0]; //routeCoords[i][0] -> route.coords[i].lat
-//            routeCoordN[1] = routeCoords[i][1]; //routeCoords[i][1] -> route.coords[i].lon
-                routeCoordN[0] = DataBase::toStringWithPrecision(route.Nodes[i].x);
-                routeCoordN[1] = DataBase::toStringWithPrecision(route.Nodes[i].y);
-                sendRoot["routeCoords"][(int) route.Nodes.size() - 1 -
-                                        i] = routeCoordN; // TODO почему в обратном порядке
-            }
+                routeCoordN[0] = DataBase::toStringWithPrecision(route.nodes[i].x);
+                routeCoordN[1] = DataBase::toStringWithPrecision(route.nodes[i].y);
+                sendRoot["routeCoords"][(int) route.nodes.size() - 1 - i] = routeCoordN;
+            } // TODO почему в обратном порядке
         } else
             sendRoot["routeCoords"] = 727;
 

@@ -44,7 +44,7 @@ double Graph::getRemotenessWeight(uint64_t startNode, uint64_t endNode, uint64_t
     // -O(exp(x^2))
     double ans = std::min(std::exp(getLength2(getNode(startNode), getNode(edgeNode)) / fineness),
                           std::exp(getLength2(getNode(endNode), getNode(edgeNode))) / fineness);
-    return std::min(ans, MAX_REMOTENESS_FINE*1.0);
+    return std::min(ans, MAX_REMOTENESS_FINE * 1.0);
     //return 1.0;
 }
 
@@ -82,20 +82,28 @@ Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string>
 
         if (el.nodeIndex == endNode) {
             uint64_t node = endNode;
-//            ans.shading = el.value;
+
             while (node != startNode) {
                 valueSet::valueSetElement route_el = valueSet.get(node);
-                ans.Nodes.push_back(getNode(route_el.nodeIndex));
+                ans.nodes.push_back(getNode(route_el.nodeIndex));
                 node = route_el.prevNodeIndex;
             }
+
+            for (int i = 1; i < ans.nodes.size(); i++) {
+                ans.shading.push_back(1 - grid.shadowPerc(ans.nodes[i - 1], ans.nodes[i]));
+            }
+
             break;
         }
+
         for (auto &e: getAdjacencyMatrix(el.nodeIndex)) {
+
             GraphShadingEdge curEdge = getShadingEdge(e.fineness, el.nodeIndex, e.index);
             double new_length = el.key +
                                 getEdgeWeight(curEdge.shading, curEdge.length, startNode, endNode, curEdge.node,
                                               trans_finesness[curEdge.fineness]);
             double new_shading = el.value + curEdge.shading;
+
             if (usedSet.get(curEdge.node) == 0 &&
                 (minSet.get(curEdge.node).inf || minSet.get(curEdge.node).key > new_length)) {
                 minSet.update(curEdge.node, new_length, e.index, new_shading);
@@ -109,22 +117,8 @@ Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string>
     }
 
     std::cout << "done: ";
-    std::cout << "number of vertices: " << ans.Nodes.size() << std::endl;
+    std::cout << "number of vertices: " << ans.nodes.size() << std::endl;
     std::cout << std::endl;
 
     return ans;
 }
-
-//int pathTest() {
-//    Graph plGraph;
-//    uint64_t node1, node2;
-//    std::cin >> node1 >> node2;
-//    Graph::graphRoute route = plGraph.getRoute(node1, node2);
-//    std::cout << route.shading << std::endl;
-//    for (auto &e: route.Nodes) {
-//        std::cout << e.x << e.y << " ";
-//    }
-//    std::cout << std::endl;
-//
-//    return 0;
-//}

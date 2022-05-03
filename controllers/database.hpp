@@ -84,7 +84,7 @@ struct GraphNode {
 };
 
 struct GraphRoute {
-    std::vector<GraphNode> Nodes;
+    std::vector<GraphNode> nodes;
     std::vector<double> shading;
 };
 

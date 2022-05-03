@@ -11,7 +11,9 @@
 #include "path.cpp"
 #include "database.hpp"
 #include "grid.hpp"
-#define MAX_REMOTENESS_FINE 1000 
+
+#define MAX_REMOTENESS_FINE 1000
+
 class Graph {
 
 private:
