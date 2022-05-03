@@ -3,11 +3,15 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Map</title>
+
+	<script src="https://kit.fontawesome.com/1183ea2860.js" crossorigin="anonymous"></script>
+
 	<link rel="icon" type="image/x-icon" href="/favicon.ico">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400&display=swap" rel="stylesheet"> 
 	<link rel="stylesheet" href="css/main.css">
+	
 
 	<script src="https://api-maps.yandex.ru/2.1/?apikey=4e32362c-8275-4f7a-8828-a20352cc4e0f&lang=ru_RU" type="text/javascript"></script>
   	<script type="text/javascript" src="js/main.js"></script>
@@ -22,7 +26,16 @@
 		<button id="disable">Disable AutoSwap</button>
 		<div id="loader"></div>
 	</div>
-	
+
+	<div class="noti">
+		
+		<div class="nTop">
+			<div class="notiClose"><i class="fa-solid fa-xmark"></i></div>
+		</div>
+		<div class="nMain">Маршрут не может быть построен</div>
+		
+	</div>
+
 	<div id="map"></div>
 
 

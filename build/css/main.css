@@ -84,6 +84,67 @@ button:hover{
 }
 
 
+.noti{
+  width: 250px;
+  height: 150px;
+  position: absolute;
+  z-index: 999999;
+  right: 150px;
+  top: 62px;
+  display: none;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #c9c9c9;
+  background-color: #fff;
+  text-align: center;
+}
+
+.notiPopup{
+  animation: popup 1.2s ease;
+  display: flex;
+}
+
+.notiPopout{
+  animation: popout 1s ease;
+}
+
+.nTop{
+  background-color: #0066ff;
+  width: 100%;
+  height: 35px;
+  position: absolute;
+  top: 0;
+  border-bottom: 1px solid #0066ff;
+}
+
+.nMain{
+  color: black;
+  margin-top: 20px;
+}
+
+.notiClose{
+  color: white;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 35px;
+  width: 35px;
+  font-size: 21px; 
+  text-align: center;
+  line-height: 35px;
+  transition: .15s;
+}
+
+
+.notiClose:hover{
+  background-color: white;
+  color: #0066ff;
+  cursor: pointer;
+}
+
+
+
 
 #loader {
 	display: none;
@@ -150,5 +211,22 @@ button:hover{
   }
   87.5% {
     box-shadow: 0em -3em 0 0, 2em -2em 0 -1em, 3em 0 0 -1em, 2em 2em 0 -1em, 0 3em 0 -1em, -2em 2em 0 0, -3em 0em 0 0, -2em -2em 0 0.2em;
+  }
+}
+
+
+@-webkit-keyframes popup{
+  0%{
+    top: -212px;
+  },
+  100%{
+    top: 62px;
+  }
+}
+
+@-webkit-keyframes popout{
+  100%{
+    opacity: 0;
+    display: none;
   }
 }
