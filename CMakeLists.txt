@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(shadows CXX C)
 
+add_compile_options(-pipe -march=native -O2 -fomit-frame-pointer -ftree-vectorize)
+# -ftree-vectorize
+
 include(CheckIncludeFileCXX)
 
 check_include_file_cxx(any HAS_ANY)
@@ -34,7 +37,7 @@ add_executable(${PROJECT_NAME}
         controllers/path.cpp
         )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS -O3)
+target_compile_options(${PROJECT_NAME} PRIVATE -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
