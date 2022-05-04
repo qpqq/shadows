@@ -45,7 +45,7 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
                 routeCoordN[0] = DataBase::toStringWithPrecision(route.nodes[i].x);
                 routeCoordN[1] = DataBase::toStringWithPrecision(route.nodes[i].y);
                 sendRoot["routeCoords"][(int) route.nodes.size() - 1 - i] = routeCoordN;
-            } // TODO почему в обратном порядке
+            } // TODO почему в обратном порядке + когда точки совпадают
         } else
             sendRoot["routeCoords"] = 727;
 

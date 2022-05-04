@@ -192,8 +192,21 @@ void Grid::_fillIn(int startInd, int endInd) {
         auto temp_way = waysArr[j];
 
         double levels = defaultLevel;
-        if (temp_way.tags.find("levels") != temp_way.tags.end())
-            levels = std::stod(temp_way.tags["levels"]);
+        if (temp_way.tags.find("building:levels") != temp_way.tags.end() and
+            (temp_way.tags["building:levels"][0] == '0' or
+             temp_way.tags["building:levels"][0] == '1' or
+             temp_way.tags["building:levels"][0] == '2' or
+             temp_way.tags["building:levels"][0] == '3' or
+             temp_way.tags["building:levels"][0] == '4' or
+             temp_way.tags["building:levels"][0] == '5' or
+             temp_way.tags["building:levels"][0] == '6' or
+             temp_way.tags["building:levels"][0] == '7' or
+             temp_way.tags["building:levels"][0] == '8' or
+             temp_way.tags["building:levels"][0] == '9')
+                ) {
+
+            levels = std::stod(temp_way.tags["building:levels"]);
+        }
 
         double dlon_shadow = (-height / EarthPerimeter * 360 * levels * cos(toRad(azim)) / tan(toRad(elev)));
         double dlat_shadow = (-height / EarthPerimeter * 360 * levels * sin(toRad(azim)) / tan(toRad(elev)));
