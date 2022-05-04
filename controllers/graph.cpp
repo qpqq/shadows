@@ -119,7 +119,6 @@ Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string>
 
     std::cout << "done: ";
     std::cout << "number of vertices: " << ans.nodes.size() << std::endl;
-    std::cout << std::endl;
 
     return ans;
 }
