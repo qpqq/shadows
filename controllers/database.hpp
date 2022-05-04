@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <cstdio>
 #include <cassert>
 #include <algorithm>
@@ -47,40 +48,46 @@
 #define VIA_FERRATA     3
 
 struct Node {
-    unsigned long long int id;
+    uint64_t id;
     double lat;
     double lon;
     std::map<std::string, std::string> tags;
 };
 
 struct Way {
-    unsigned long long int id;
+    uint64_t id;
     std::vector<Node> seq;
     std::map<std::string, std::string> tags;
 };
 
-struct Mate {
-    unsigned long long int id;
-    unsigned long long int prev;           // previous node in the array
-    unsigned long long int next;           // next node in the array
-    std::string path_type;      // way_tag for classifying roads
+class GraphNode {
+
+public:
+
+    uint64_t id{};
+
+    double x{};
+    double y{};
+
+    int fineness{};
+
+    GraphNode();
+
+    explicit GraphNode(int id);
+
+    friend bool operator==(const GraphNode &a, const GraphNode &b);
+
+    friend bool operator!=(const GraphNode &a, const GraphNode &b);
+
+    friend bool operator<(const GraphNode &a, const GraphNode &b);
 };
 
 struct GraphShadingEdge {
     uint64_t fineness; // Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
     double shading; // Затененность дороги выраженная в длине незатененной части
     double length; // Длина дороги
-    uint64_t node; // Вершина конца ребра
-    uint64_t prevNode; // Вершина начала ребра
-};
-
-struct GraphNode {
-    double x;
-    double y;
-
-    friend bool operator==(const GraphNode &a, const GraphNode &b);
-
-    friend bool operator!=(const GraphNode &a, const GraphNode &b);
+    GraphNode node; // Вершина конца ребра
+    GraphNode prevNode; // Вершина начала ребра
 };
 
 struct GraphRoute {
@@ -88,11 +95,12 @@ struct GraphRoute {
     std::vector<double> shading;
 };
 
-struct WeightNode {
-    uint64_t index;
-    int fineness;
+struct Mate {
+    GraphNode curr;
+    GraphNode prev;           // previous node in the array
+    GraphNode next;           // next node in the array
+    std::string path_type;      // way_tag for classifying roads
 };
-
 
 class DataBase {
 
@@ -189,13 +197,13 @@ public:
      */
     [[maybe_unused]] void buildingsReceiveTest();
 
-    void neighboursReceive(const std::string &node_id, std::vector<Mate> &mates);
+//    void neighboursReceive(const std::string &node_id, std::vector<Mate> &mates);
 
-    int define_fine(const std::string &path_type);
+//    int define_fine(const std::string &path_type);
 
-    std::vector<WeightNode> getAdjacencyMatrix(uint64_t node);
+//    std::vector<GraphNode> getAdjacencyMatrix(uint64_t node);
 
-    std::map<uint64_t, std::vector<uint64_t>>
+    std::map<GraphNode, std::set<GraphNode>>
     getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation,
                            double offset = 0);
 
@@ -203,7 +211,7 @@ public:
 
     GraphNode getNode(uint64_t node);
 
-    uint64_t closestNode(const std::vector<std::string> &coords);
+    GraphNode closestNode(const std::vector<std::string> &coords);
 };
 
 
@@ -219,7 +227,7 @@ public:
 
     int step();
 
-    void data(unsigned long long int &ret, int col_id);
+    void data(uint64_t &ret, int col_id);
 
     void data(double &ret, int col_id);
 
@@ -233,21 +241,27 @@ class Closest {
 
 private:
 
-    std::vector<Node> quickSelect(std::vector<Node> &points, int k);
+    GraphNode zero;
 
-    int partition(std::vector<Node> &points, int left, int right);
+    std::vector<GraphNode> quickSelect(std::vector<GraphNode> &points, int k);
 
-    Node &choosePivot(std::vector<Node> &points, int left, int right);
+    int partition(std::vector<GraphNode> &points, int left, int right);
 
-    double squaredDistance(Node &point);
+    GraphNode &choosePivot(std::vector<GraphNode> &points, int left, int right);
+
+    double squaredDistance(GraphNode &point);
 
 public:
 
     Closest();
 
+    Closest(GraphNode zero);
+
     ~Closest();
 
-    std::vector<Node> kClosest(std::vector<Node> &points, int k);
+    std::vector<GraphNode> kClosest(std::vector<GraphNode> &points, int k);
 
-    void shift(Node &zero, std::vector<Node> &point);
+    void shift(std::vector<GraphNode> &point);
+
+    void antiShift(std::vector<GraphNode> &point);
 };

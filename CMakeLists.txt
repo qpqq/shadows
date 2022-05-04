@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(shadows CXX C)
 
-add_compile_options(-pipe -march=native -O2 -fomit-frame-pointer -ftree-vectorize)
+add_compile_options()
 # -ftree-vectorize
 
 include(CheckIncludeFileCXX)
@@ -51,7 +51,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE drogon)
 
 # ##############################################################################
 
-target_compile_options(drogon PRIVATE -DCMAKE_BUILD_TYPE=Release)
+target_compile_options(drogon PRIVATE -DCMAKE_BUILD_TYPE=Release
+        -pipe -march=native -O2 -fomit-frame-pointer -ftree-vectorize)
 
 if (CMAKE_CXX_STANDARD LESS 17)
     # With C++14, use boost to support any, string_view and filesystem

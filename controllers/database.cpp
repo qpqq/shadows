@@ -27,12 +27,22 @@ if the query returns an integer but the sqlite3_column_text() interface is used 
 
 */
 
+GraphNode::GraphNode() = default;
+
+GraphNode::GraphNode(int id) {
+    this->id = id;
+}
+
 bool operator==(const GraphNode &a, const GraphNode &b) {
     return (a.x == b.x) && (a.y == b.y);
 }
 
 bool operator!=(const GraphNode &a, const GraphNode &b) {
     return !(a == b);
+}
+
+bool operator<(const GraphNode &a, const GraphNode &b) {
+    return a.id < b.id;
 }
 
 DataBase::DataBase() = default;
@@ -209,92 +219,92 @@ DataBase::buildingsReceive(std::vector<std::string> &coords1, std::vector<std::s
     }
 }
 
-void DataBase::neighboursReceive(const std::string &node_id, std::vector<Mate> &mates) {
+//void DataBase::neighboursReceive(const std::string &node_id, std::vector<Mate> &mates) {
+//
+//    std::string query, withas, mid_select, query_tag;
+//    std::vector<std::string> ways;
+//    std::string mid_way;
+//    unsigned int i;
+//    Mate mid_mate;
+//
+//    query = "SELECT way_id FROM ways WHERE node_id = " + node_id + ";";
+//
+//    Request req_ways(*this, query);
+//
+//    while (req_ways.step() != SQLITE_DONE) {
+//        req_ways.data(mid_way, 0);
+//        ways.push_back(mid_way);
+//    }
+//
+//    for (i = 0; i < ways.size(); ++i) {
+//        mid_mate.prev = 0;
+//        mid_mate.next = 0;
+//        mid_mate.path_type = "";
+//
+//        withas = "WITH mid AS ( "
+//                 "SELECT node_id, "
+//                 "LAG(node_id, 1, 0) OVER (ORDER BY seq_id) pv, "
+//                 "LEAD(node_id, 1, 0) OVER (ORDER BY seq_id) nt "
+//                 "FROM ways "
+//                 "WHERE way_id = " + ways[i] + ") ";
+//
+//        mid_select = "SELECT pv, nt "
+//                     "FROM mid "
+//                     "WHERE node_id = " + node_id + ";";
+//
+//        query = withas + mid_select;
+//
+//        query_tag = "SELECT tag_val "
+//                    "FROM way_tags "
+//                    "WHERE tag_key = 'highway' AND way_id = " + ways[i] + ";";
+//
+//        Request req_tag(*this, query_tag);
+//        Request req_neighbour(*this, query);
+//
+//        while (req_tag.step() != SQLITE_DONE) {
+//            req_tag.data(mid_mate.path_type, 0);
+//        }
+//
+//        while (req_neighbour.step() != SQLITE_DONE) {
+//            req_neighbour.data(mid_mate.prev, 0);
+//            req_neighbour.data(mid_mate.next, 1);
+//            mates.push_back(mid_mate);
+//        }
+//    }
+//}
 
-    std::string query, withas, mid_select, query_tag;
-    std::vector<std::string> ways;
-    std::string mid_way;
-    unsigned int i;
-    Mate mid_mate;
+//int DataBase::define_fine(const std::string &path_type) {
+//    if (price_list.count(path_type) > 0) {
+//        return price_list[path_type];
+//    }
+//    return 0;
+//}
 
-    query = "SELECT way_id FROM ways WHERE node_id = " + node_id + ";";
-
-    Request req_ways(*this, query);
-
-    while (req_ways.step() != SQLITE_DONE) {
-        req_ways.data(mid_way, 0);
-        ways.push_back(mid_way);
-    }
-
-    for (i = 0; i < ways.size(); ++i) {
-        mid_mate.prev = 0;
-        mid_mate.next = 0;
-        mid_mate.path_type = "";
-
-        withas = "WITH mid AS ( "
-                 "SELECT node_id, "
-                 "LAG(node_id, 1, 0) OVER (ORDER BY seq_id) pv, "
-                 "LEAD(node_id, 1, 0) OVER (ORDER BY seq_id) nt "
-                 "FROM ways "
-                 "WHERE way_id = " + ways[i] + ") ";
-
-        mid_select = "SELECT pv, nt "
-                     "FROM mid "
-                     "WHERE node_id = " + node_id + ";";
-
-        query = withas + mid_select;
-
-        query_tag = "SELECT tag_val "
-                    "FROM way_tags "
-                    "WHERE tag_key = 'highway' AND way_id = " + ways[i] + ";";
-
-        Request req_tag(*this, query_tag);
-        Request req_neighbour(*this, query);
-
-        while (req_tag.step() != SQLITE_DONE) {
-            req_tag.data(mid_mate.path_type, 0);
-        }
-
-        while (req_neighbour.step() != SQLITE_DONE) {
-            req_neighbour.data(mid_mate.prev, 0);
-            req_neighbour.data(mid_mate.next, 1);
-            mates.push_back(mid_mate);
-        }
-    }
-}
-
-int DataBase::define_fine(const std::string &path_type) {
-    if (price_list.count(path_type) > 0) {
-        return price_list[path_type];
-    }
-    return 0;
-}
-
-std::vector<WeightNode> DataBase::getAdjacencyMatrix(uint64_t node) {
-
-    std::vector<WeightNode> nodes;
-    std::string node_id = std::to_string(node);
-    std::vector<Mate> mates;
-    WeightNode mid_node{};
-    int i, fine;
-
-    neighboursReceive(node_id, mates);
-
-    for (i = 0; i < mates.size(); ++i) {
-        fine = define_fine(mates[i].path_type);
-        if (mates[i].prev != 0) {
-            mid_node.index = mates[i].prev;
-            mid_node.fineness = fine;
-            nodes.push_back(mid_node);
-        }
-        if (mates[i].next != 0) {
-            mid_node.index = mates[i].next;
-            mid_node.fineness = fine;
-            nodes.push_back(mid_node);
-        }
-    }
-    return nodes;
-}
+//std::vector<GraphNode> DataBase::getAdjacencyMatrix(uint64_t node) {
+//
+//    std::vector<GraphNode> nodes;
+//    std::string node_id = std::to_string(node);
+//    std::vector<Mate> mates;
+//    GraphNode mid_node{};
+//    int i, fine;
+//
+//    neighboursReceive(node_id, mates);
+//
+//    for (i = 0; i < mates.size(); ++i) {
+//        fine = define_fine(mates[i].path_type);
+//        if (mates[i].prev != 0) {
+//            mid_node.id = mates[i].prev;
+//            mid_node.fineness = fine;
+//            nodes.push_back(mid_node);
+//        }
+//        if (mates[i].next != 0) {
+//            mid_node.id = mates[i].next;
+//            mid_node.fineness = fine;
+//            nodes.push_back(mid_node);
+//        }
+//    }
+//    return nodes;
+//}
 
 Node DataBase::nodeCoord(const std::string &node_id) {
 
@@ -317,32 +327,33 @@ Node DataBase::nodeCoord(const std::string &node_id) {
 
 GraphNode DataBase::getNode(uint64_t node) {
     std::string node_id = std::to_string(node);
-    GraphNode gr_node{};
+    GraphNode graphNode;
     Node mid_node = nodeCoord(node_id);
-    gr_node.x = mid_node.lat;
-    gr_node.y = mid_node.lon;
-    return gr_node;
+    graphNode.id = node;
+    graphNode.x = mid_node.lat;
+    graphNode.y = mid_node.lon;
+    return graphNode;
 }
 
-uint64_t DataBase::closestNode(const std::vector<std::string> &coords) {
+GraphNode DataBase::closestNode(const std::vector<std::string> &coords) {
     const std::string &lat = coords[0];
     const std::string &lon = coords[1];
 
     // TODO: сделать проверку пустоты запроса через count() или количества строк (sqlite3.h)???.
 
     std::string query, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
-    std::vector<Node> points;
-    Node mid_node, zero;
+    std::vector<GraphNode> points;
+    GraphNode mid_node, zero;
     double radius = 0.00015625; // 1.0 km TODO EarthRadius
     double delta = 0.00015625; // 1.0 km
     unsigned int i;
 
-    zero.lat = std::stod(lat);
-    zero.lon = std::stod(lon);
+    zero.x = std::stod(lat);
+    zero.y = std::stod(lon);
 
     mid_node.id = 0;
-    mid_node.lat = -1.0;
-    mid_node.lon = -1.0;
+    mid_node.x = -1.0;
+    mid_node.y = -1.0;
 
     std::cout << "Searching for the closest node... ";
     std::cout.flush();
@@ -367,8 +378,8 @@ uint64_t DataBase::closestNode(const std::vector<std::string> &coords) {
         while (req.step() != SQLITE_DONE) {
 
             req.data(mid_node.id, 0);
-            req.data(mid_node.lat, 1);
-            req.data(mid_node.lon, 2);
+            req.data(mid_node.x, 1);
+            req.data(mid_node.y, 2);
 
             if (mid_node.id != 0) {
                 points.push_back(mid_node);
@@ -385,18 +396,17 @@ uint64_t DataBase::closestNode(const std::vector<std::string> &coords) {
     // RunTimeError assertion
     assert(!points.empty());
 
-    std::vector<Node> result;
-    Closest finder;
+    std::vector<GraphNode> result;
+    Closest finder(zero);
 
-    finder.shift(zero, points);
     result = finder.kClosest(points, 1);
 
     std::cout << "done: " << result[0].id << std::endl;
 
-    return result[0].id;
+    return result[0];
 }
 
-std::map<uint64_t, std::vector<uint64_t>>
+std::map<GraphNode, std::set<GraphNode>>
 DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation,
                                  double offset) {
     // TODO удалить road_nodes
@@ -404,7 +414,7 @@ DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::ve
     std::cout << "Building adjacency matrix... ";
     std::cout.flush();
 
-    std::map<uint64_t, std::vector<uint64_t>> dict;
+    std::map<GraphNode, std::set<GraphNode>> dict;
     std::string query_matrix, between;
     Mate mid_mate;
 
@@ -417,30 +427,24 @@ DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::ve
 
     between = "lat BETWEEN " + latLow + " AND " + latHigh + " AND lon BETWEEN " + lonLeft + " AND " + lonRight;
 
-    query_matrix = "SELECT node_id, prev, next "
+    query_matrix = "SELECT node_id, prev, next, lat, lon "
                    "FROM adjacency "
                    "WHERE " + between + ";";
 
     Request req_matrix(*this, query_matrix);
 
     while (req_matrix.step() != SQLITE_DONE) {
-        req_matrix.data(mid_mate.id, 0);
-        req_matrix.data(mid_mate.prev, 1);
-        req_matrix.data(mid_mate.next, 2);
+        req_matrix.data(mid_mate.curr.id, 0);
+        req_matrix.data(mid_mate.prev.id, 1);
+        req_matrix.data(mid_mate.next.id, 2);
+        req_matrix.data(mid_mate.curr.x, 3);
+        req_matrix.data(mid_mate.curr.y, 4);
 
-        if (mid_mate.prev != 0) {
-            if (std::find(begin(dict[mid_mate.id]), end(dict[mid_mate.id]), mid_mate.prev) ==
-                std::end(dict[mid_mate.id])) {
-                dict[mid_mate.id].push_back(mid_mate.prev);
-            }
-        }
+        if (mid_mate.prev.id != 0)
+            dict[mid_mate.curr].insert(getNode(mid_mate.prev.id));
 
-        if (mid_mate.next != 0) {
-            if (std::find(begin(dict[mid_mate.id]), end(dict[mid_mate.id]), mid_mate.next) ==
-                std::end(dict[mid_mate.id])) {
-                dict[mid_mate.id].push_back(mid_mate.next);
-            }
-        }
+        if (mid_mate.next.id != 0)
+            dict[mid_mate.curr].insert(getNode(mid_mate.next.id));
 
     }
 
@@ -468,7 +472,7 @@ int Request::step() {
     return sqlite3_step(stmt);
 }
 
-void Request::data(unsigned long long int &ret, int col_id) {
+void Request::data(uint64_t &ret, int col_id) {
     ret = sqlite3_column_int64(stmt, col_id);
 }
 
@@ -486,13 +490,18 @@ Request::~Request() {
 
 Closest::Closest() = default;
 
+Closest::Closest(GraphNode zero) {
+    this->zero = zero;
+}
+
 Closest::~Closest() = default;
 
-std::vector<Node> Closest::kClosest(std::vector<Node> &points, int k) {
+std::vector<GraphNode> Closest::kClosest(std::vector<GraphNode> &points, int k) {
+    shift(points);
     return quickSelect(points, k);
 }
 
-std::vector<Node> Closest::quickSelect(std::vector<Node> &points, int k) {
+std::vector<GraphNode> Closest::quickSelect(std::vector<GraphNode> &points, int k) {
     int left = 0, right = points.size() - 1;
     int pivotIndex = points.size();
     while (pivotIndex != k) {
@@ -506,12 +515,14 @@ std::vector<Node> Closest::quickSelect(std::vector<Node> &points, int k) {
         }
     }
 
+    antiShift(points);
+
     // Return the first k elements of the partially sorted vector
-    return std::vector<Node>(points.begin(), points.begin() + k);
+    return std::vector<GraphNode>(points.begin(), points.begin() + k);
 }
 
-int Closest::partition(std::vector<Node> &points, int left, int right) {
-    Node &pivot = choosePivot(points, left, right);
+int Closest::partition(std::vector<GraphNode> &points, int left, int right) {
+    GraphNode &pivot = choosePivot(points, left, right);
     double pivotDist = squaredDistance(pivot);
     while (left < right) {
         // Iterate through the range and swap elements to make sure
@@ -532,23 +543,30 @@ int Closest::partition(std::vector<Node> &points, int left, int right) {
     return left;
 }
 
-Node &Closest::choosePivot(std::vector<Node> &points, int left, int right) {
+GraphNode &Closest::choosePivot(std::vector<GraphNode> &points, int left, int right) {
     // Choose a pivot element of the vector
     return points[left + (right - left) / 2];
 }
 
-double Closest::squaredDistance(Node &point) {
+double Closest::squaredDistance(GraphNode &point) {
     // Calculate and return the squared Euclidean distance
-    return point.lat * point.lat + point.lon * point.lon;
+    return point.x * point.x + point.y * point.y;
 }
 
-void Closest::shift(Node &zero, std::vector<Node> &points) {
+void Closest::shift(std::vector<GraphNode> &points) {
     // change coordinate system:
     // u = x - xZero;
     // v = y - yZero;
 
     for (auto &point: points) {
-        point.lat = point.lat - zero.lat;
-        point.lon = point.lon - zero.lon;
+        point.x = point.x - zero.x;
+        point.y = point.y - zero.y;
+    }
+}
+
+void Closest::antiShift(std::vector<GraphNode> &points) {
+    for (auto &point: points) {
+        point.x = point.x + zero.x;
+        point.y = point.y + zero.y;
     }
 }

@@ -2,17 +2,19 @@
 #include <algorithm>
 #include <map>
 
+#include "database.hpp"
+
 template<typename T>
 struct minSet {
     struct item {
-        uint64_t key;
+        GraphNode key;
         double prior;
         T value;
         item *l, *r;
 
         item() : key(0), prior(0), l(nullptr), r(nullptr) {};
 
-        item(uint64_t key, double prior, const T &value) : key(key), prior(prior), value(value), l(nullptr), r(nullptr) {};
+        item(GraphNode key, double prior, const T &value) : key(key), prior(prior), value(value), l(nullptr), r(nullptr) {};
     };
 
     typedef item *pitem;
@@ -30,7 +32,7 @@ struct minSet {
         if (root) recurDel(root);
     }
 
-    void _split(pitem t, uint64_t key, pitem &l, pitem &r) {
+    void _split(pitem t, GraphNode key, pitem &l, pitem &r) {
         if (!t)
             l = r = nullptr;
         else if (key < t->key)
@@ -59,7 +61,7 @@ struct minSet {
         t = new_t;
     }
 
-    void _erase(pitem &t, uint64_t key) {
+    void _erase(pitem &t, GraphNode key) {
         if (!t) {
             return;
         }
@@ -81,7 +83,7 @@ struct minSet {
         return l;
     }
 
-    pitem _search(uint64_t key) {
+    pitem _search(GraphNode key) {
         pitem p = root;
         while (p && p->key != key) {
             p = (key < p->key ? p->l : p->r);
@@ -97,7 +99,7 @@ struct minSet {
         return item();
     }
 
-    item get(uint64_t key) {
+    item get(GraphNode key) {
         pitem p = _search(key);
         if (p) {
             return *p;
@@ -106,7 +108,7 @@ struct minSet {
         }
     }
 
-    void erase(uint64_t key) {
+    void erase(GraphNode key) {
         _erase(root, key);
     }
 
@@ -114,7 +116,7 @@ struct minSet {
         return !root;
     }
 
-    void update(uint64_t key, double prior, const T &value) {
+    void update(GraphNode key, double prior, const T &value) {
         pitem it = _search(key);
         if (it) {
             erase(key);
@@ -200,19 +202,19 @@ struct minimumsSet {
     struct minimumsSetElement {
         double key;//Приоритет
         double value;
-        uint64_t edgeIndex;
-        uint64_t nodeIndex;//Ключ
+        GraphNode edgeIndex;
+        GraphNode nodeIndex;//Ключ
         char inf;
     };
 
     struct minSetType {
         double value;
-        uint64_t edgeIndex;
+        GraphNode edgeIndex;
         char inf;
 
         minSetType() : value(0), edgeIndex(0), inf(1) {}
 
-        minSetType(double value, uint64_t edgeIndex = 0, char inf = 1) : value(value), edgeIndex(edgeIndex),
+        minSetType(double value, GraphNode edgeIndex = GraphNode(0), char inf = 1) : value(value), edgeIndex(edgeIndex),
                                                                          inf(inf) {};
     };
 
@@ -234,7 +236,7 @@ struct minimumsSet {
         return ans;
     }
 
-    minimumsSetElement get(uint64_t nodeIndex) {
+    minimumsSetElement get(GraphNode nodeIndex) {
         auto ret = treap.get(nodeIndex);
         minimumsSetElement ans = {
                 ret.prior,
@@ -246,7 +248,7 @@ struct minimumsSet {
         return ans;
     }
 
-    void update(uint64_t nodeIndex, double weight, uint64_t edgeIndex, double shading) {
+    void update(GraphNode nodeIndex, double weight, GraphNode edgeIndex, double shading) {
         bool updated = false;
         minSetType el = {
                 shading, edgeIndex, 0
@@ -254,40 +256,40 @@ struct minimumsSet {
         treap.update(nodeIndex, weight, el);
     }
 
-    void erase(uint64_t nodeIndex) {
+    void erase(GraphNode nodeIndex) {
         treap.erase(nodeIndex);
     }
 };
 
 struct usedSet {
-    std::map<uint64_t, bool> _map;
+    std::map<GraphNode, bool> _map;
 
-    void update(uint64_t nodeIndex, char used) {
+    void update(GraphNode nodeIndex, char used) {
         _map[nodeIndex] = used;
     }
 
-    bool get(uint64_t nodeIndex) {
+    bool get(GraphNode nodeIndex) {
         return _map[nodeIndex];
     }
 };
 
 struct valueSet {
     struct valueSetElement {
-        uint64_t nodeIndex;
+        GraphNode nodeIndex;
         double value;
-        uint64_t edgeIndex;
-        uint64_t prevNodeIndex;
+        GraphNode edgeIndex;
+        GraphNode prevNodeIndex;
     };
-    std::map<uint64_t, valueSetElement> _map;
+    std::map<GraphNode, valueSetElement> _map;
 
-    void update(uint64_t nodeIndex, double value, uint64_t edgeIndex, uint64_t prevNodeIndex) {
+    void update(GraphNode nodeIndex, double value, GraphNode edgeIndex, GraphNode prevNodeIndex) {
         valueSetElement el = {
                 nodeIndex, value, edgeIndex, prevNodeIndex
         };
         _map[nodeIndex] = el;
     }
 
-    valueSetElement get(uint64_t nodeIndex) {
+    valueSetElement get(GraphNode nodeIndex) {
         return _map[nodeIndex];
     }
 };
