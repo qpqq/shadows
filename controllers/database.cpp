@@ -130,12 +130,12 @@ DataBase::buildingsReceive(std::vector<std::string> &coords1, std::vector<std::s
     unsigned int i, counter = 0;
 
     between =
-            "(lat BETWEEN " + latLow + " AND " + latHigh + ")" + " AND (lon BETWEEN " + lonLeft + " AND " + lonRight +
+            "(clat BETWEEN " + latLow + " AND " + latHigh + ")" + " AND (clon BETWEEN " + lonLeft + " AND " + lonRight +
             ")";
 
     query = "SELECT way_id "
-            "FROM WayBuildings "
-            "WHERE tag_key = 'building' AND " + between + " GROUP BY way_id;";
+            "FROM buildings "
+            "WHERE " + between + ";";
 
     pattern_tags = "SELECT way_tags.tag_key, way_tags.tag_val "
                    "FROM way_tags "
