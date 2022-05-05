@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(shadows CXX C)
 
-add_compile_options()
+add_compile_options(-pipe -march=native -O2 -fomit-frame-pointer -ftree-vectorize)
 # -ftree-vectorize
 
 include(CheckIncludeFileCXX)
@@ -41,7 +41,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE -lsqlite3 -DSQLITE_ENABLE_MATH_FU
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
-# to add drogon 
+# to add drogon
 add_subdirectory(drogon)
 target_link_libraries(${PROJECT_NAME} PRIVATE drogon)
 #
@@ -51,8 +51,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE drogon)
 
 # ##############################################################################
 
-target_compile_options(drogon PRIVATE -DCMAKE_BUILD_TYPE=Release
-        -pipe -march=native -O2 -fomit-frame-pointer -ftree-vectorize)
+target_compile_options(drogon PRIVATE -DCMAKE_BUILD_TYPE=Release)
 
 if (CMAKE_CXX_STANDARD LESS 17)
     # With C++14, use boost to support any, string_view and filesystem
