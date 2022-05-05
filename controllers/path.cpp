@@ -14,7 +14,8 @@ struct minSet {
 
         item() : key(0), prior(0), l(nullptr), r(nullptr) {};
 
-        item(GraphNode key, double prior, const T &value) : key(key), prior(prior), value(value), l(nullptr), r(nullptr) {};
+        item(GraphNode key, double prior, const T &value) : key(key), prior(prior), value(value), l(nullptr),
+                                                            r(nullptr) {};
     };
 
     typedef item *pitem;
@@ -215,7 +216,7 @@ struct minimumsSet {
         minSetType() : value(0), edgeIndex(0), inf(1) {}
 
         minSetType(double value, GraphNode edgeIndex = GraphNode(0), char inf = 1) : value(value), edgeIndex(edgeIndex),
-                                                                         inf(inf) {};
+                                                                                     inf(inf) {};
     };
 
     minSet<minSetType> treap;
@@ -301,6 +302,6 @@ static std::vector<double> trans_finesness = {
         100, //common road          3
         500, //higher priority      4
         1000, //high priority       5
-        5000, //very high priority   6
-        50, //common road          7 l-c priority
+        5000, //very high priority  6
+        50, //common road           7 l-c priority
 };

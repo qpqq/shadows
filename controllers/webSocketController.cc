@@ -19,8 +19,8 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
         std::vector<std::string> toLocation = {recRoot["toLocation"][0].asString(),
                                                recRoot["toLocation"][1].asString()}; //to location coords JSON -> cpp array convert
 
-        fromLocation = {"55.576435085570381", "37.678452148437486"};
-        toLocation = {"55.90491853179855", "37.547989501953126"};
+//        fromLocation = {"55.576435085570381", "37.678452148437486"};
+//        toLocation = {"55.90491853179855", "37.547989501953126"};
 
         std::cout << "[" << fromLocation[0] << ", " << fromLocation[1] << "] --> "
                   << "[" << toLocation[0] << ", " << toLocation[1] << "]" << std::endl;
