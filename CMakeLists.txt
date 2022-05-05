@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(shadows CXX C)
 
-add_compile_options(-pipe -march=native -O2 -fomit-frame-pointer -ftree-vectorize)
+add_compile_options(-pipe -march=native -Ofast -fomit-frame-pointer -ftree-vectorize)
 # -ftree-vectorize
 
 include(CheckIncludeFileCXX)
@@ -24,6 +24,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME}
         main.cpp
+        sqlite/sqlite3.h
+        sqlite/sqlite3.c
         controllers/graph.hpp
         controllers/graph.cpp
         controllers/database.hpp
@@ -32,12 +34,25 @@ add_executable(${PROJECT_NAME}
         controllers/grid.cpp
         controllers/solar.hpp
         controllers/solar.cpp
-        sqlite/sqlite3.h
-        sqlite/sqlite3.c
         controllers/path.cpp
         )
 
-target_compile_options(${PROJECT_NAME} PRIVATE -lsqlite3 -DSQLITE_ENABLE_MATH_FUNCTIONS)
+target_compile_options(${PROJECT_NAME} PRIVATE
+        -lsqlite3
+        -DSQLITE_ENABLE_MATH_FUNCTIONS
+
+        -DSQLITE_DQS=0
+        -DSQLITE_DEFAULT_MEMSTATUS=0
+        -DSQLITE_DEFAULT_WAL_SYNCHRONOUS=1
+        -DSQLITE_LIKE_DOESNT_MATCH_BLOBS
+        -DSQLITE_MAX_EXPR_DEPTH=0
+        -DSQLITE_OMIT_DECLTYPE
+        -DSQLITE_OMIT_DEPRECATED
+        -DSQLITE_OMIT_PROGRESS_CALLBACK
+        -DSQLITE_OMIT_SHARED_CACHE
+        -DSQLITE_USE_ALLOCA
+#        -DSQLITE_OMIT_AUTOINIT
+        )
 
 # ##############################################################################
 # If you include the drogon source code locally in your project, use this method
