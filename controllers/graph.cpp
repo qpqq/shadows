@@ -4,11 +4,11 @@ Graph::Graph(DataBase &db) : db(db) {}
 
 Graph::~Graph() = default;
 
-double Graph::getShading(GraphNode node1, GraphNode node2) {
-    return (1 - grid.shadowPerc(node1, node2)) * getLength2(node1, node2);
+double Graph::getShading(GraphNode &Node1, GraphNode &Node2) {
+    return (1 - grid.shadowPerc(Node1, Node2)) * getLength2(Node1, Node2);
 }
 
-GraphShadingEdge Graph::getShadingEdge(uint64_t fineness, GraphNode node1, GraphNode node2) {
+GraphShadingEdge Graph::getShadingEdge(uint64_t fineness, GraphNode &node1, GraphNode &node2) {
     GraphShadingEdge gse = {fineness,
                             getShading(node1, node2),
                             getLength2(node1, node2),
@@ -17,7 +17,7 @@ GraphShadingEdge Graph::getShadingEdge(uint64_t fineness, GraphNode node1, Graph
     return gse;
 }
 
-std::vector<GraphNode> Graph::getAdjacencyMatrix(GraphNode node) {
+std::vector<GraphNode> Graph::getAdjacencyMatrix(GraphNode &node) {
     std::vector<GraphNode> graphNodeArr;
     for (auto adjacentNode: adjacencyMatrix[node]) {
         graphNodeArr.push_back(adjacentNode);
@@ -26,14 +26,14 @@ std::vector<GraphNode> Graph::getAdjacencyMatrix(GraphNode node) {
     return graphNodeArr;
 }
 
-double Graph::getLength2(GraphNode node1, GraphNode node2) {
+double Graph::getLength2(GraphNode &node1, GraphNode &node2) {
     return EarthRadius *
            acos(sin(node1.x * M_PI / 180) * sin(node2.x * M_PI / 180) +
                 cos(node1.x * M_PI / 180) * cos(node2.x * M_PI / 180) *
                 cos(node2.y * M_PI / 180 - node1.y * M_PI / 180));
 }
 
-double Graph::getRemotenessWeight(GraphNode startNode, GraphNode endNode, GraphNode edgeNode, double fineness) {
+double Graph::getRemotenessWeight(GraphNode &startNode, GraphNode &endNode, GraphNode &edgeNode, double fineness) {
     // -O(exp(x^2))
     double ans = std::min(std::exp(getLength2(startNode, edgeNode) / fineness),
                           std::exp(getLength2(endNode, edgeNode)) / fineness);
@@ -42,7 +42,7 @@ double Graph::getRemotenessWeight(GraphNode startNode, GraphNode endNode, GraphN
 }
 
 double Graph::getEdgeWeight(double shading, double length,
-                            GraphNode startNode, GraphNode endNode, GraphNode edgeNode, double fineness) {
+                            GraphNode &startNode, GraphNode &endNode, GraphNode &edgeNode, double fineness) {
     return (shading + 0.1 * length) * getRemotenessWeight(startNode, endNode, edgeNode, fineness);
 }
 

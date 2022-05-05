@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include <string>
 #include <vector>
 #include <map>
@@ -83,9 +84,9 @@ public:
 };
 
 struct GraphShadingEdge {
-    uint64_t fineness; // Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
-    double shading; // Затененность дороги выраженная в длине незатененной части
-    double length; // Длина дороги
+    uint64_t fineness{}; // Крупность дороги, т.е. чем более крупная дорога тем больше эта величина
+    double shading{}; // Затененность дороги выраженная в длине незатененной части
+    double length{}; // Длина дороги
     GraphNode node; // Вершина конца ребра
     GraphNode prevNode; // Вершина начала ребра
 };

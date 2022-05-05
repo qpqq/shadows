@@ -33,18 +33,18 @@ public:
 
     ~Graph();
 
-    double getShading(GraphNode Node1, GraphNode Node2); // -shading в метрах
+    double getShading(GraphNode &Node1, GraphNode &Node2); // -shading в метрах
 
-    GraphShadingEdge getShadingEdge(uint64_t fineness, GraphNode node1, GraphNode node2);
+    GraphShadingEdge getShadingEdge(uint64_t fineness, GraphNode &node1, GraphNode &node2);
 
-    std::vector<GraphNode> getAdjacencyMatrix(GraphNode node); // -map
+    std::vector<GraphNode> getAdjacencyMatrix(GraphNode &node); // -map
 
-    double getLength2(GraphNode node1, GraphNode node2);
+    double getLength2(GraphNode &node1, GraphNode &node2);
 
-    double getRemotenessWeight(GraphNode startNode, GraphNode endNode, GraphNode edgeNode, double fineness);
+    double getRemotenessWeight(GraphNode &startNode, GraphNode &endNode, GraphNode &edgeNode, double fineness);
 
     double getEdgeWeight(double shading, double length,
-                         GraphNode startNode, GraphNode endNode, GraphNode edgeNode, double fineness);
+                         GraphNode &startNode, GraphNode &endNode, GraphNode &edgeNode, double fineness);
 
     GraphRoute getRoute(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation); // -output
 };

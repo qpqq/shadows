@@ -344,8 +344,11 @@ GraphNode DataBase::closestNode(const std::vector<std::string> &coords) {
     std::string query, dlat_plus, dlat_minus, dlon_plus, dlon_minus, _radius;
     std::vector<GraphNode> points;
     GraphNode mid_node, zero;
-    double radius = 0.00015625; // 1.0 km TODO EarthRadius
-    double delta = 0.00015625; // 1.0 km
+    double radius = 1000; // 1.0 km
+    double delta = 1000; // 1.0 km
+    radius *= 180 / M_PI / 6378100;
+    delta *= 180 / M_PI / 6378100;
+
     unsigned int i;
 
     zero.x = std::stod(lat);
@@ -363,15 +366,21 @@ GraphNode DataBase::closestNode(const std::vector<std::string> &coords) {
 
         radius += delta;
         _radius = toStringWithPrecision(radius);
-        dlat_minus = lat + " - " + _radius;
-        dlat_plus = lat + " + " + _radius;
-        dlon_minus = lon + " - " + _radius;
-        dlon_plus = lon + " + " + _radius;
+        dlat_minus = lat;
+        dlat_minus += " - " + _radius;
+        dlat_plus = lat;
+        dlat_plus += " + " + _radius;
+        dlon_minus = lon;
+        dlon_minus += " - " + _radius;
+        dlon_plus = lon;
+        dlon_plus += " + " + _radius;
 
         query = "SELECT node_id, lat, lon "
                 "FROM road_nodes "
-                "WHERE lat BETWEEN " + dlat_minus + " AND " + dlat_plus + " AND  lon BETWEEN " + dlon_minus + " AND " +
-                dlon_plus + ";";
+                "WHERE lat BETWEEN " + dlat_minus;
+        query += " AND " + dlat_plus;
+        query += " AND  lon BETWEEN " + dlon_minus;
+        query += " AND " + dlon_plus + ";";
 
         Request req(*this, query);
 
