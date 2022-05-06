@@ -64,17 +64,15 @@ struct Way {
 
 struct GraphNode {
     uint64_t id{};
-
     double x{};
     double y{};
-
     int fineness{};
 
     GraphNode() = default;
 
     explicit GraphNode(int id) { this->id = id; };
 
-    friend bool operator==(const GraphNode &a, const GraphNode &b) { return (a.x == b.x) && (a.y == b.y); };
+    friend bool operator==(const GraphNode &a, const GraphNode &b) { return a.id == b.id; };
 
     friend bool operator!=(const GraphNode &a, const GraphNode &b) { return !(a == b); };
 
@@ -104,8 +102,13 @@ struct Mate {
 class DataBase : public drogon::Plugin<DataBase> {
 
 private:
+
     const char *path{};
     sqlite3 *db{};
+
+    std::map<uint64_t, GraphNode> nodes;
+    std::map<GraphNode, std::set<GraphNode>> adjacencyMatrix;
+    std::vector<Way> buildings;
 
     std::map<std::string, int> price_list = {
             {"abandoned",      ABANDONED},
@@ -151,16 +154,17 @@ public:
     DataBase();
 
     /**
-     * Constructor with a database path
-     * @param path to database
-     * Single-argument constructors must be marked explicit to avoid unintentional implicit conversions
-     */
-    explicit DataBase(const std::string &path);
-
-    /**
      * Default destructor
      */
     ~DataBase() override;
+
+    void open();
+
+    void initNodes();
+
+    void initAdjacencyMatrix();
+
+    void initBuildings();
 
     /// This method must be called by drogon to initialize and start the plugin.
     /// It must be implemented by the user.
@@ -173,8 +177,6 @@ public:
     const char *getPath();
 
     sqlite3 *getPointer();
-
-    int setPointer();
 
     /**
      * Converts doubles to string with the specified precision.
@@ -207,8 +209,8 @@ public:
     [[maybe_unused]] void buildingsReceiveTest();
 
     std::map<GraphNode, std::set<GraphNode>>
-    getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation,
-                           double offset = 0);
+    getAdjacencyMatrix(std::vector<std::string> &coords1, std::vector<std::string> &coords2,
+                       double offset = 0);
 
     Node nodeCoord(const std::string &node_id);
 

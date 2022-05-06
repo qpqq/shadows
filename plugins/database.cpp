@@ -29,36 +29,13 @@ if the query returns an integer but the sqlite3_column_text() interface is used 
 
 DataBase::DataBase() = default;
 
-DataBase::DataBase(const std::string &path) {
-//    int flag;
-//    this->path = path.c_str();
-//
-//    std::cout << "Opening " << path << "... ";
-//    std::cout.flush();
-//
-//    flag = setPointer();
-//
-//    if (flag != SQLITE_OK) {
-//        std::cout << "failed" << std::endl;
-//        std::cerr << "response: " << sqlite3_errmsg(db) << std::endl;
-//        assert(flag == SQLITE_OK);
-//    } else {
-//        std::cout << "done" << std::endl;
-//    }
-}
-
 DataBase::~DataBase() = default;
 
-void DataBase::initAndStart(const Json::Value &config) {
-//    DataBase("../shadow.db");
-
-    int flag;
-    this->path = "../shadow.db";
-
+void DataBase::open() {
     std::cout << "Opening " << path << "... ";
     std::cout.flush();
 
-    flag = setPointer();
+    int flag = sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, nullptr);
 
     if (flag != SQLITE_OK) {
         std::cout << "failed" << std::endl;
@@ -66,8 +43,127 @@ void DataBase::initAndStart(const Json::Value &config) {
         assert(flag == SQLITE_OK);
     } else {
         std::cout << "done" << std::endl;
-        std::cout << std::endl;
     }
+}
+
+void DataBase::initNodes() {
+    std::cout << "Initializing nodes... ";
+    std::cout.flush();
+
+    std::string query = "SELECT nodes.node_id, nodes.lat, nodes.lon "
+                        "FROM nodes;";
+
+    Request req_node(*this, query);
+
+    while (req_node.step() != SQLITE_DONE) {
+        GraphNode graphNode;
+        req_node.data(graphNode.id, 0);
+        req_node.data(graphNode.x, 1);
+        req_node.data(graphNode.y, 2);
+
+        nodes[graphNode.id] = graphNode;
+    }
+
+    std::cout << "done: " << nodes.size() << " elements" << std::endl;
+}
+
+void DataBase::initAdjacencyMatrix() {
+    std::cout << "Initializing adjacency matrix... ";
+    std::cout.flush();
+
+    Mate mid_mate;
+
+    std::string query = "SELECT node_id, prev, next, lat, lon "
+                        "FROM adjacency;";
+
+    Request req_matrix(*this, query);
+
+    while (req_matrix.step() != SQLITE_DONE) {
+        req_matrix.data(mid_mate.curr.id, 0);
+        req_matrix.data(mid_mate.prev, 1);
+        req_matrix.data(mid_mate.next, 2);
+        req_matrix.data(mid_mate.curr.x, 3);
+        req_matrix.data(mid_mate.curr.y, 4);
+
+        if (mid_mate.prev != 0)
+            adjacencyMatrix[mid_mate.curr].insert(nodes[mid_mate.prev]);
+
+        if (mid_mate.next != 0)
+            adjacencyMatrix[mid_mate.curr].insert(nodes[mid_mate.next]);
+
+    }
+
+    std::cout << "done: " << adjacencyMatrix.size() << " elements" << std::endl;
+}
+
+void DataBase::initBuildings() {
+    std::cout << "Initializing buildings... ";
+    std::cout.flush();
+
+    std::string query, query_tags, query_nodes, pattern_tags, pattern_nodes;
+    std::string between, tag_key, tag_val;
+
+    Way way;
+    Node node;
+    unsigned int i, counter = 0;
+
+    query = "SELECT way_id "
+            "FROM buildings;";
+
+    pattern_tags = "SELECT way_tags.tag_key, way_tags.tag_val "
+                   "FROM way_tags "
+                   "WHERE way_tags.tag_key = 'building:levels' AND way_tags.way_id = ";
+
+    pattern_nodes = "SELECT nodes.node_id, nodes.lat, nodes.lon "
+                    "FROM nodes "
+                    "JOIN ways ON ways.node_id = nodes.node_id "
+                    "WHERE ways.way_id = ";
+
+    Request req_ways(*this, query);
+
+    while (req_ways.step() != SQLITE_DONE) {
+        req_ways.data(way.id, 0);
+        buildings.push_back(way);
+        counter++;
+    }
+
+    counter = 0;
+
+    for (i = 0; i < buildings.size(); ++i) {
+        query_tags = pattern_tags + std::to_string(buildings[i].id) + ";";
+        query_nodes = pattern_nodes + std::to_string(buildings[i].id) + ";";
+
+        Request req_tags(*this, query_tags);
+        Request req_nodes(*this, query_nodes);
+
+        while (req_tags.step() != SQLITE_DONE) {
+            req_tags.data(tag_key, 0);
+            req_tags.data(tag_val, 1);
+            buildings[i].tags.insert(std::pair<std::string, std::string>(tag_key, tag_val));
+        }
+
+        while (req_nodes.step() != SQLITE_DONE) {
+            req_nodes.data(node.id, 0);
+            req_nodes.data(node.lat, 1);
+            req_nodes.data(node.lon, 2);
+            buildings[i].seq.push_back(node);
+            counter++;
+        }
+    }
+
+    std::cout << "done: " << buildings.size() << " elements" << std::endl;
+}
+
+void DataBase::initAndStart(const Json::Value &config) {
+    this->path = "../shadow.db";
+    open();
+
+    initNodes();
+    initAdjacencyMatrix();
+    initBuildings();
+
+    std::cout << "The server is ready" << std::endl;
+    std::cout << std::endl;
 }
 
 void DataBase::shutdown() {
@@ -81,10 +177,6 @@ const char *DataBase::getPath() {
 
 sqlite3 *DataBase::getPointer() {
     return db;
-}
-
-int DataBase::setPointer() {
-    return sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, nullptr);
 }
 
 std::string DataBase::toStringWithPrecision(double x, const int n) {
@@ -120,85 +212,38 @@ std::vector<std::string> DataBase::boundaries(const std::vector<std::vector<std:
 std::vector<Way>
 DataBase::buildingsReceive(std::vector<std::string> &coords1, std::vector<std::string> &coords2, double offset) {
 
-    std::cout << "Selecting ways by coordinates... ";
+    std::cout << "Building buildings... ";
     std::cout.flush();
 
-    std::string latLow, latHigh, lonLeft, lonRight;
+    double latLow, latHigh, lonLeft, lonRight;
 
     auto bound = boundaries({coords1, coords2}, offset);
-    latLow = bound[0];
-    latHigh = bound[1];
-    lonLeft = bound[2];
-    lonRight = bound[3];
+    latLow = std::stod(bound[0]);
+    latHigh = std::stod(bound[1]);
+    lonLeft = std::stod(bound[2]);
+    lonRight = std::stod(bound[3]);
 
-    std::vector<Way> build;
+    std::vector<Way> buildingsCrop;
 
-    std::string query, query_tags, query_nodes, pattern_tags, pattern_nodes;
-    std::string between, tag_key, tag_val;
-    Way mid_way;
-    Node mid_node;
-    unsigned int i, counter = 0;
+    for (auto &building: buildings) {
 
-    between =
-            "(clat BETWEEN " + latLow + " AND " + latHigh + ")" + " AND (clon BETWEEN " + lonLeft + " AND " + lonRight +
-            ")";
-
-    query = "SELECT way_id "
-            "FROM buildings "
-            "WHERE " + between + ";";
-
-    pattern_tags = "SELECT way_tags.tag_key, way_tags.tag_val "
-                   "FROM way_tags "
-                   "WHERE way_tags.tag_key = 'building:levels' AND way_tags.way_id = ";
-
-    pattern_nodes = "SELECT nodes.node_id, nodes.lat, nodes.lon "
-                    "FROM nodes "
-                    "JOIN ways ON ways.node_id = nodes.node_id "
-                    "WHERE ways.way_id = ";
-
-    Request req_ways(*this, query);
-
-//    std::cout << "Selecting ways by coordinates: ";
-
-    while (req_ways.step() != SQLITE_DONE) {
-        req_ways.data(mid_way.id, 0);
-        build.push_back(mid_way);
-        counter++;
-    }
-
-//    std::cout << "total " + std::to_string(counter - 1) << std::endl;
-
-    counter = 0;
-
-//    std::cout << "Selecting building:levels by way.id: ";
-
-    for (i = 0; i < build.size(); ++i) {
-        query_tags = pattern_tags + std::to_string(build[i].id) + ";";
-        query_nodes = pattern_nodes + std::to_string(build[i].id) + ";";
-
-        Request req_tags(*this, query_tags);
-        Request req_nodes(*this, query_nodes);
-
-        while (req_tags.step() != SQLITE_DONE) {
-            req_tags.data(tag_key, 0);
-            req_tags.data(tag_val, 1);
-            build[i].tags.insert(std::pair<std::string, std::string>(tag_key, tag_val));
+        int pass = 1;
+        for (auto &node: building.seq) {
+            if (!(latLow < node.lat and node.lat < latHigh and lonLeft < node.lon and node.lon < lonRight)) {
+                pass = 0;
+                break;
+            }
         }
 
-        while (req_nodes.step() != SQLITE_DONE) {
-            req_nodes.data(mid_node.id, 0);
-            req_nodes.data(mid_node.lat, 1);
-            req_nodes.data(mid_node.lon, 2);
-            build[i].seq.push_back(mid_node);
-            counter++;
-        }
+        if (pass == 0)
+            continue;
+
+        buildingsCrop.push_back(building);
     }
 
-//    std::cout << "total " + std::to_string(i - 1) << std::endl;
-//    std::cout << "Total nodes " + std::to_string(counter - 1) << std::endl;
-    std::cout << "done: " << "number of nodes: " << counter - 1 << std::endl;
+    std::cout << "done: " << buildingsCrop.size() << " elements" << std::endl;
 
-    return build;
+    return buildingsCrop;
 }
 
 [[maybe_unused]] void DataBase::buildingsReceiveTest() {
@@ -227,6 +272,46 @@ DataBase::buildingsReceive(std::vector<std::string> &coords1, std::vector<std::s
             break;
         }
     }
+}
+
+std::map<GraphNode, std::set<GraphNode>>
+DataBase::getAdjacencyMatrix(std::vector<std::string> &coords1, std::vector<std::string> &coords2,
+                             double offset) {
+    // TODO удалить road_nodes
+
+    std::cout << "Building adjacency matrix... ";
+    std::cout.flush();
+
+    double latLow, latHigh, lonLeft, lonRight;
+
+    auto bound = boundaries({coords1, coords2}, offset);
+    latLow = std::stod(bound[0]);
+    latHigh = std::stod(bound[1]);
+    lonLeft = std::stod(bound[2]);
+    lonRight = std::stod(bound[3]);
+
+
+    std::map<GraphNode, std::set<GraphNode>> adjacencyMatrixCrop;
+
+    for (auto &pair: adjacencyMatrix) {
+        auto graphNode = pair.first;
+        auto adjacencyNodes = pair.second;
+
+        if (!(latLow < graphNode.x and graphNode.x < latHigh and lonLeft < graphNode.y and graphNode.y < lonRight))
+            continue;
+
+        std::set<GraphNode> tempSet;
+        for (auto &node: adjacencyNodes) {
+            if (latLow < node.x and node.x < latHigh and lonLeft < node.y and node.y < lonRight)
+                tempSet.insert(node);
+        }
+
+        adjacencyMatrixCrop[graphNode] = tempSet;
+    }
+
+    std::cout << "done: " << adjacencyMatrixCrop.size() << " elements" << std::endl;
+
+    return adjacencyMatrixCrop;
 }
 
 Node DataBase::nodeCoord(const std::string &node_id) {
@@ -336,55 +421,6 @@ GraphNode DataBase::closestNode(const std::vector<std::string> &coords) {
     std::cout << "done: " << result[0].id << std::endl;
 
     return result[0];
-}
-
-std::map<GraphNode, std::set<GraphNode>>
-DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation,
-                                 double offset) {
-    // TODO удалить road_nodes
-
-    std::cout << "Building adjacency matrix... ";
-    std::cout.flush();
-
-    std::map<GraphNode, std::set<GraphNode>> dict;
-    std::string query_matrix, between;
-    Mate mid_mate;
-
-    auto bound = boundaries({fromLocation, toLocation}, offset);
-    std::string latLow = bound[0];
-    std::string latHigh = bound[1];
-    std::string lonLeft = bound[2];
-    std::string lonRight = bound[3];
-
-
-    between = "lat BETWEEN " + latLow + " AND " + latHigh + " AND lon BETWEEN " + lonLeft + " AND " + lonRight;
-
-    query_matrix = "SELECT node_id, prev, next, lat, lon "
-                   "FROM adjacency "
-                   "WHERE " + between + ";";
-
-    Request req_matrix(*this, query_matrix);
-
-    while (req_matrix.step() != SQLITE_DONE) {
-        req_matrix.data(mid_mate.curr.id, 0);
-        req_matrix.data(mid_mate.prev, 1);
-        req_matrix.data(mid_mate.next, 2);
-        req_matrix.data(mid_mate.curr.x, 3);
-        req_matrix.data(mid_mate.curr.y, 4);
-
-        if (mid_mate.prev != 0)
-            dict[mid_mate.curr].insert(getNode(mid_mate.prev));
-
-        if (mid_mate.next != 0)
-            dict[mid_mate.curr].insert(getNode(mid_mate.next));
-
-    }
-
-    std::cout << "done: ";
-    std::cout << "number of elements: " << dict.size() << std::endl;
-
-    return dict;
-
 }
 
 Request::Request(DataBase &database, const std::string &query) {

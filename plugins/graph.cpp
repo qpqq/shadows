@@ -17,7 +17,7 @@ GraphShadingEdge Graph::getShadingEdge(uint64_t fineness, GraphNode &node1, Grap
     return gse;
 }
 
-std::vector<GraphNode> Graph::getAdjacencyMatrix(GraphNode &node) {
+std::vector<GraphNode> Graph::getAdjacencyNodes(GraphNode &node) {
     std::vector<GraphNode> graphNodeArr;
     for (auto adjacentNode: adjacencyMatrix[node]) {
         graphNodeArr.push_back(adjacentNode);
@@ -54,7 +54,7 @@ Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string>
 
     double offset = 1000;
     offset *= 180 / M_PI / EarthRadius;
-    adjacencyMatrix = db.getAdjacencyMatrixFull(fromLocation, toLocation, offset);
+    adjacencyMatrix = db.getAdjacencyMatrix(fromLocation, toLocation, offset);
     grid = Grid({fromLocation, toLocation}, offset, db.buildingsReceive(fromLocation, toLocation, offset), 1.5);
 //    grid.print_grid();
 
@@ -90,7 +90,7 @@ Graph::getRoute(std::vector<std::string> &fromLocation, std::vector<std::string>
             break;
         }
 
-        for (auto &e: getAdjacencyMatrix(el.nodeIndex)) {
+        for (auto &e: getAdjacencyNodes(el.nodeIndex)) {
 
             GraphShadingEdge curEdge = getShadingEdge(e.fineness, el.nodeIndex, e);
             double new_length = el.key +

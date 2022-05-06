@@ -37,7 +37,7 @@ public:
 
     GraphShadingEdge getShadingEdge(uint64_t fineness, GraphNode &node1, GraphNode &node2);
 
-    std::vector<GraphNode> getAdjacencyMatrix(GraphNode &node); // -map
+    std::vector<GraphNode> getAdjacencyNodes(GraphNode &node); // -map
 
     double getLength2(GraphNode &node1, GraphNode &node2);
 
