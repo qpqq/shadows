@@ -1,4 +1,4 @@
-#include "database.hpp"
+#include "plugins/database.hpp"
 
 /*
 Used functions from sqlite3.h:
@@ -27,34 +27,38 @@ if the query returns an integer but the sqlite3_column_text() interface is used 
 
 */
 
-GraphNode::GraphNode() = default;
-
-GraphNode::GraphNode(int id) {
-    this->id = id;
-}
-
-bool operator==(const GraphNode &a, const GraphNode &b) {
-    return (a.x == b.x) && (a.y == b.y);
-}
-
-bool operator!=(const GraphNode &a, const GraphNode &b) {
-    return !(a == b);
-}
-
-bool operator<(const GraphNode &a, const GraphNode &b) {
-    return a.id < b.id;
-}
-
 DataBase::DataBase() = default;
 
 DataBase::DataBase(const std::string &path) {
+//    int flag;
+//    this->path = path.c_str();
+//
+//    std::cout << "Opening " << path << "... ";
+//    std::cout.flush();
+//
+//    flag = setPointer();
+//
+//    if (flag != SQLITE_OK) {
+//        std::cout << "failed" << std::endl;
+//        std::cerr << "response: " << sqlite3_errmsg(db) << std::endl;
+//        assert(flag == SQLITE_OK);
+//    } else {
+//        std::cout << "done" << std::endl;
+//    }
+}
+
+DataBase::~DataBase() = default;
+
+void DataBase::initAndStart(const Json::Value &config) {
+//    DataBase("../shadow.db");
+
     int flag;
-    this->path = path.c_str();
+    this->path = "../shadow.db";
 
     std::cout << "Opening " << path << "... ";
     std::cout.flush();
 
-    flag = sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, nullptr);
+    flag = setPointer();
 
     if (flag != SQLITE_OK) {
         std::cout << "failed" << std::endl;
@@ -62,7 +66,13 @@ DataBase::DataBase(const std::string &path) {
         assert(flag == SQLITE_OK);
     } else {
         std::cout << "done" << std::endl;
+        std::cout << std::endl;
     }
+}
+
+void DataBase::shutdown() {
+    sqlite3_close(db);
+    this->~DataBase();
 }
 
 const char *DataBase::getPath() {
@@ -73,8 +83,8 @@ sqlite3 *DataBase::getPointer() {
     return db;
 }
 
-DataBase::~DataBase() {
-    sqlite3_close(db);
+int DataBase::setPointer() {
+    return sqlite3_open_v2(this->path, &db, SQLITE_OPEN_READWRITE, nullptr);
 }
 
 std::string DataBase::toStringWithPrecision(double x, const int n) {
@@ -218,93 +228,6 @@ DataBase::buildingsReceive(std::vector<std::string> &coords1, std::vector<std::s
         }
     }
 }
-
-//void DataBase::neighboursReceive(const std::string &node_id, std::vector<Mate> &mates) {
-//
-//    std::string query, withas, mid_select, query_tag;
-//    std::vector<std::string> ways;
-//    std::string mid_way;
-//    unsigned int i;
-//    Mate mid_mate;
-//
-//    query = "SELECT way_id FROM ways WHERE node_id = " + node_id + ";";
-//
-//    Request req_ways(*this, query);
-//
-//    while (req_ways.step() != SQLITE_DONE) {
-//        req_ways.data(mid_way, 0);
-//        ways.push_back(mid_way);
-//    }
-//
-//    for (i = 0; i < ways.size(); ++i) {
-//        mid_mate.prev = 0;
-//        mid_mate.next = 0;
-//        mid_mate.path_type = "";
-//
-//        withas = "WITH mid AS ( "
-//                 "SELECT node_id, "
-//                 "LAG(node_id, 1, 0) OVER (ORDER BY seq_id) pv, "
-//                 "LEAD(node_id, 1, 0) OVER (ORDER BY seq_id) nt "
-//                 "FROM ways "
-//                 "WHERE way_id = " + ways[i] + ") ";
-//
-//        mid_select = "SELECT pv, nt "
-//                     "FROM mid "
-//                     "WHERE node_id = " + node_id + ";";
-//
-//        query = withas + mid_select;
-//
-//        query_tag = "SELECT tag_val "
-//                    "FROM way_tags "
-//                    "WHERE tag_key = 'highway' AND way_id = " + ways[i] + ";";
-//
-//        Request req_tag(*this, query_tag);
-//        Request req_neighbour(*this, query);
-//
-//        while (req_tag.step() != SQLITE_DONE) {
-//            req_tag.data(mid_mate.path_type, 0);
-//        }
-//
-//        while (req_neighbour.step() != SQLITE_DONE) {
-//            req_neighbour.data(mid_mate.prev, 0);
-//            req_neighbour.data(mid_mate.next, 1);
-//            mates.push_back(mid_mate);
-//        }
-//    }
-//}
-
-//int DataBase::define_fine(const std::string &path_type) {
-//    if (price_list.count(path_type) > 0) {
-//        return price_list[path_type];
-//    }
-//    return 0;
-//}
-
-//std::vector<GraphNode> DataBase::getAdjacencyMatrix(uint64_t node) {
-//
-//    std::vector<GraphNode> nodes;
-//    std::string node_id = std::to_string(node);
-//    std::vector<Mate> mates;
-//    GraphNode mid_node{};
-//    int i, fine;
-//
-//    neighboursReceive(node_id, mates);
-//
-//    for (i = 0; i < mates.size(); ++i) {
-//        fine = define_fine(mates[i].path_type);
-//        if (mates[i].prev != 0) {
-//            mid_node.id = mates[i].prev;
-//            mid_node.fineness = fine;
-//            nodes.push_back(mid_node);
-//        }
-//        if (mates[i].next != 0) {
-//            mid_node.id = mates[i].next;
-//            mid_node.fineness = fine;
-//            nodes.push_back(mid_node);
-//        }
-//    }
-//    return nodes;
-//}
 
 Node DataBase::nodeCoord(const std::string &node_id) {
 

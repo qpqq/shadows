@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(shadows CXX C)
 
-add_compile_options(-pipe -march=native -Ofast -fomit-frame-pointer -ftree-vectorize)
-# -ftree-vectorize
+add_compile_options(-pipe)
+add_compile_options(-march=native -Ofast -fomit-frame-pointer -ftree-vectorize)
 
 include(CheckIncludeFileCXX)
 
@@ -24,17 +24,20 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME}
         main.cpp
+
+        plugins/database.hpp
+        plugins/database.cpp
+
         sqlite/sqlite3.h
         sqlite/sqlite3.c
-        controllers/graph.hpp
-        controllers/graph.cpp
-        controllers/database.hpp
-        controllers/database.cpp
-        controllers/grid.hpp
-        controllers/grid.cpp
-        controllers/solar.hpp
-        controllers/solar.cpp
-        controllers/path.cpp
+
+        plugins/graph.hpp
+        plugins/graph.cpp
+        plugins/grid.hpp
+        plugins/grid.cpp
+        plugins/solar.hpp
+        plugins/solar.cpp
+        plugins/path.cpp
         )
 
 target_compile_options(${PROJECT_NAME} PRIVATE
@@ -51,7 +54,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
         -DSQLITE_OMIT_PROGRESS_CALLBACK
         -DSQLITE_OMIT_SHARED_CACHE
         -DSQLITE_USE_ALLOCA
-#        -DSQLITE_OMIT_AUTOINIT
+        # -DSQLITE_OMIT_AUTOINIT
         )
 
 # ##############################################################################

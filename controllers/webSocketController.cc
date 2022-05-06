@@ -3,7 +3,8 @@
 #include <iomanip>
 
 #include "webSocketController.h"
-#include "graph.hpp"
+#include "plugins/graph.hpp"
+#include "plugins/database.hpp"
 
 void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnPtr, std::string &&message,
                                            const WebSocketMessageType &type) {
@@ -25,8 +26,8 @@ void webSocketController::handleNewMessage(const WebSocketConnectionPtr &wsConnP
         std::cout << "[" << fromLocation[0] << ", " << fromLocation[1] << "] --> "
                   << "[" << toLocation[0] << ", " << toLocation[1] << "]" << std::endl;
 
-        DataBase db("../controllers/shadow.db");
-        Graph city(db);
+        auto *pluginPtr = app().getPlugin<DataBase>();
+        Graph city(*pluginPtr);
 
         auto route = city.getRoute(fromLocation, toLocation);
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "drogon/lib/inc/drogon/plugins/Plugin.h"
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -10,7 +12,6 @@
 #include <cstdio>
 #include <cassert>
 #include <algorithm>
-#include <sstream>
 
 #include "sqlite/sqlite3.h"
 
@@ -61,10 +62,7 @@ struct Way {
     std::map<std::string, std::string> tags;
 };
 
-class GraphNode {
-
-public:
-
+struct GraphNode {
     uint64_t id{};
 
     double x{};
@@ -72,15 +70,15 @@ public:
 
     int fineness{};
 
-    GraphNode();
+    GraphNode() = default;
 
-    explicit GraphNode(int id);
+    explicit GraphNode(int id) { this->id = id; };
 
-    friend bool operator==(const GraphNode &a, const GraphNode &b);
+    friend bool operator==(const GraphNode &a, const GraphNode &b) { return (a.x == b.x) && (a.y == b.y); };
 
-    friend bool operator!=(const GraphNode &a, const GraphNode &b);
+    friend bool operator!=(const GraphNode &a, const GraphNode &b) { return !(a == b); };
 
-    friend bool operator<(const GraphNode &a, const GraphNode &b);
+    friend bool operator<(const GraphNode &a, const GraphNode &b) { return a.id < b.id; };
 };
 
 struct GraphShadingEdge {
@@ -98,12 +96,12 @@ struct GraphRoute {
 
 struct Mate {
     GraphNode curr;
-    GraphNode prev;           // previous node in the array
-    GraphNode next;           // next node in the array
-    std::string path_type;      // way_tag for classifying roads
+    GraphNode prev; // previous node in the array
+    GraphNode next; // next node in the array
+    std::string path_type; // way_tag for classifying roads
 };
 
-class DataBase {
+class DataBase : public drogon::Plugin<DataBase> {
 
 private:
     const char *path{};
@@ -160,13 +158,23 @@ public:
     explicit DataBase(const std::string &path);
 
     /**
-    * Default destructor
-    */
-    ~DataBase();
+     * Default destructor
+     */
+    ~DataBase() override;
+
+    /// This method must be called by drogon to initialize and start the plugin.
+    /// It must be implemented by the user.
+    void initAndStart(const Json::Value &config) override;
+
+    /// This method must be called by drogon to shutdown the plugin.
+    /// It must be implemented by the user.
+    void shutdown() override;
 
     const char *getPath();
 
     sqlite3 *getPointer();
+
+    int setPointer();
 
     /**
      * Converts doubles to string with the specified precision.
@@ -197,12 +205,6 @@ public:
      * Test for buildingsReceive
      */
     [[maybe_unused]] void buildingsReceiveTest();
-
-//    void neighboursReceive(const std::string &node_id, std::vector<Mate> &mates);
-
-//    int define_fine(const std::string &path_type);
-
-//    std::vector<GraphNode> getAdjacencyMatrix(uint64_t node);
 
     std::map<GraphNode, std::set<GraphNode>>
     getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::vector<std::string> &toLocation,
