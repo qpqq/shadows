@@ -96,8 +96,8 @@ struct GraphRoute {
 
 struct Mate {
     GraphNode curr;
-    GraphNode prev; // previous node in the array
-    GraphNode next; // next node in the array
+    uint64_t prev; // previous node in the array
+    uint64_t next; // next node in the array
     std::string path_type; // way_tag for classifying roads
 };
 

@@ -367,16 +367,16 @@ DataBase::getAdjacencyMatrixFull(std::vector<std::string> &fromLocation, std::ve
 
     while (req_matrix.step() != SQLITE_DONE) {
         req_matrix.data(mid_mate.curr.id, 0);
-        req_matrix.data(mid_mate.prev.id, 1);
-        req_matrix.data(mid_mate.next.id, 2);
+        req_matrix.data(mid_mate.prev, 1);
+        req_matrix.data(mid_mate.next, 2);
         req_matrix.data(mid_mate.curr.x, 3);
         req_matrix.data(mid_mate.curr.y, 4);
 
-        if (mid_mate.prev.id != 0)
-            dict[mid_mate.curr].insert(getNode(mid_mate.prev.id));
+        if (mid_mate.prev != 0)
+            dict[mid_mate.curr].insert(getNode(mid_mate.prev));
 
-        if (mid_mate.next.id != 0)
-            dict[mid_mate.curr].insert(getNode(mid_mate.next.id));
+        if (mid_mate.next != 0)
+            dict[mid_mate.curr].insert(getNode(mid_mate.next));
 
     }
 
