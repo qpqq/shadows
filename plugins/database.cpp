@@ -73,7 +73,7 @@ void DataBase::initAdjacencyMatrix() {
 
     Mate mid_mate;
 
-    std::string query = "SELECT node_id, prev, next, lat, lon "
+    std::string query = "SELECT node_id, prev, next, lat, lon, tag_val "
                         "FROM adjacency;";
 
     Request req_matrix(*this, query);
@@ -84,6 +84,9 @@ void DataBase::initAdjacencyMatrix() {
         req_matrix.data(mid_mate.next, 2);
         req_matrix.data(mid_mate.curr.x, 3);
         req_matrix.data(mid_mate.curr.y, 4);
+        req_matrix.data(mid_mate.path_type, 5);
+
+        mid_mate.curr.fineness = price_list[mid_mate.path_type];
 
         if (mid_mate.prev != 0)
             adjacencyMatrix[mid_mate.curr].insert(nodes[mid_mate.prev]);
@@ -497,7 +500,6 @@ int Closest::partition(std::vector<GraphNode> &points, int left, int right) {
         // that all points closer than the pivot are to the left
         if (squaredDistance(points[left]) >= pivotDist) {
             std::swap(points[left], points[right]);
-            // points[left].swap(points[right]);
             right--;
         } else {
             left++;
