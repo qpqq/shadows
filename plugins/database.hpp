@@ -49,17 +49,32 @@
 #define UNCLASSIFIED    5
 #define VIA_FERRATA     3
 
+
+/////////////////////////////////////////////////////////////////////////////////////
+#define BRIDGE          5
+/////////////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ * @brief The same node as in OSM database.
+ * 
+ */
 struct Node {
-    uint64_t id;
-    double lat;
-    double lon;
-    std::map<std::string, std::string> tags;
+    uint64_t id; // node id
+    double lat;  // node latitude
+    double lon;  // node longitude
+    std::map<std::string, std::string> tags;  // node tags
 };
 
+
+/**
+ * @brief The same way as in OSM database.
+ * 
+ */
 struct Way {
-    uint64_t id;
-    std::vector<Node> seq;
-    std::map<std::string, std::string> tags;
+    uint64_t id; // way id
+    std::vector<Node> seq;  // sequence of nodes
+    std::map<std::string, std::string> tags;  // way tags
 };
 
 struct GraphNode {
@@ -92,6 +107,10 @@ struct GraphRoute {
     std::vector<double> shading;
 };
 
+/**
+ * @brief Used to build AdjacencyMatrix.
+ * 
+ */
 struct Mate {
     GraphNode curr;
     uint64_t prev; // previous node in the array
@@ -110,6 +129,10 @@ private:
     std::map<GraphNode, std::set<GraphNode>> adjacencyMatrix;
     std::vector<Way> buildings;
 
+    /**
+     * @brief Road's fines dictionary. Used in AdjacencyMatrix.
+     * 
+     */
     std::map<std::string, int> price_list = {
             {"abandoned",      ABANDONED},
             {"bridleway",      BRIDLEWAY},
@@ -143,7 +166,8 @@ private:
             {"trunk_link",     TRUNK_LINK},
             {"unclassified",   UNCLASSIFIED},
             {"via_ferrata",    VIA_FERRATA},
-            {"",               UNDEFINED_PATH}
+            {"",               UNDEFINED_PATH},
+            {"bridge",         BRIDGE}
     };
 
 public:
@@ -158,6 +182,10 @@ public:
      */
     ~DataBase() override;
 
+    /**
+     * @brief Opens a database connection.
+     * 
+     */
     void open();
 
     void initNodes();
@@ -174,8 +202,18 @@ public:
     /// It must be implemented by the user.
     void shutdown() override;
 
+    /**
+     * @brief Gets the path to the database.
+     * 
+     * @return path to the database 
+     */
     const char *getPath();
 
+    /**
+     * @brief Gets the pointer to the database.
+     * 
+     * @return pointer to the database 
+     */
     sqlite3 *getPointer();
 
     /**
@@ -208,14 +246,34 @@ public:
      */
     [[maybe_unused]] void buildingsReceiveTest();
 
+    /**
+     * @brief Builds the AdjacencyMatrix by the coordinates.
+     * 
+     * @param coords1 string vector {latitude, longitude} of the first point
+     * @param coords2 string vector {latitude, longitude} of the second point
+     * @param offset boundary offset. In radians
+     * @return AdjacancyMatrix
+     */
     std::map<GraphNode, std::set<GraphNode>>
     getAdjacencyMatrix(std::vector<std::string> &coords1, std::vector<std::string> &coords2,
                        double offset = 0);
-
+    
     Node nodeCoord(const std::string &node_id);
 
+    /**
+     * @brief Returns node's coordinates.
+     * 
+     * @param node input node
+     * @return node's coordinates by the structure GraphNode.
+     */
     GraphNode getNode(uint64_t node);
 
+    /**
+     * @brief Returns the closestNode that has been found by coordinates.
+     * 
+     * @param coords string vector {latitude, longitude}
+     * @return information about node by the structure GraphNode.
+     */
     GraphNode closestNode(const std::vector<std::string> &coords);
 };
 
@@ -228,28 +286,77 @@ private:
 
 public:
 
+    /**
+     * @brief Prepares SQL statement.
+     * 
+     * @param database DataBase object
+     * @param query query to be executed
+     * @details See sqlite3_prepare_v2 for more information.
+     */
     Request(DataBase &database, const std::string &query);
 
+    /**
+     * @brief Makes a step.
+     * @details See sqlite3_step for more information.
+     * 
+     * @return error code 
+     */
     int step();
 
+    /**
+     * @brief Receives data from col_id and stores it in ret.
+     * 
+     * @param ret link to parameter to be returned
+     * @param col_id column number to be read
+     */
     void data(uint64_t &ret, int col_id);
 
+    /**
+     * @brief Receives data from col_id and stores it in ret.
+     * 
+     * @param ret link to parameter to be returned
+     * @param col_id column number to be read
+     */
     void data(double &ret, int col_id);
 
+    /**
+     * @brief Receives data from col_id and stores it in ret.
+     * 
+     * @param ret link to parameter to be returned
+     * @param col_id column number to be read
+     */
     void data(std::string &ret, int col_id);
 
     ~Request();
 };
 
-
+/**
+ * @brief Fast searching for the closest node. Based on binary search.
+ * 
+ */
 class Closest {
 
 private:
 
     GraphNode zero;
 
+    /**
+     * @brief Selects k closest nodes from points vector.
+     * 
+     * @param points vector of nodes
+     * @param k a number of nodes to be searched for
+     * @return k closest nodes
+     */
     std::vector<GraphNode> quickSelect(std::vector<GraphNode> &points, int k);
 
+    /**
+     * @brief Standard patrition function.
+     * 
+     * @param points vector of nodes
+     * @param left left border of the vector
+     * @param right right border of the vector
+     * @return new left border of the vector 
+     */
     int partition(std::vector<GraphNode> &points, int left, int right);
 
     GraphNode &choosePivot(std::vector<GraphNode> &points, int left, int right);
