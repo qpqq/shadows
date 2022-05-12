@@ -70,8 +70,6 @@ ymaps.ready(function () {
 
     });
 
-    let fromToLocations = []; //Объединенный массив откуда, куда для более простой отправки
-
     let notiClose = document.getElementsByClassName("notiClose")[0], //Для анимации "не может быть построен маршрут"
         noti = document.getElementsByClassName("noti")[0];
     notiClose.onclick = function () {
@@ -86,8 +84,7 @@ ymaps.ready(function () {
 
     document.getElementById('button').onclick = function () {
 
-        fromToLocations = [fromLocation, toLocation];
-        if (fromToLocations[0] != undefined && fromToLocations[1] != undefined) { //Если ни одна из точек не пустая, то можно отправить
+        if (fromLocation != undefined && toLocation != undefined) { //Если ни одна из точек не пустая, то можно отправить
 
             connection.send(JSON.stringify({
                 fromLocation: fromLocation,
