@@ -68,7 +68,8 @@ sudo make packages
 
 ```bash
 cd build
-make build
+cmake ..
+cmake --build . -j 8
 ```
 
 Остаётся только запустить
