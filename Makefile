@@ -1,7 +1,3 @@
-build:
-	cmake ..
-	cmake --build . -j 8
-
 packages:
 	sudo apt install git
 	sudo apt install gcc
