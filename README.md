@@ -1,47 +1,83 @@
 # Shadows
 
-## Установка
+## Перед использованием
+
+Данное приложение используется в качестве сервера, на котором предварительно должна быть установлена база данных нужного города. Вся необходимая информация о её установке приведена ниже. 
+
+## Системные требования
+
+*Данный раздел находится в процессе разработки*
 
 Подробные системные требования фреймворка Drogon:
 [ссылка](https://github.com/drogonframework/drogon/wiki/ENG-02-Installation).
 
-Если кратко, то надо установить/обновить эти пакеты
 
-```bash
-sudo apt install git
-sudo apt install gcc
-sudo apt install g++
-sudo apt install cmake
-sudo apt install libjsoncpp-dev
-sudo apt install uuid-dev
-sudo apt install openssl
-sudo apt install libssl-dev
-sudo apt install zlib1g-dev
-sudo apt install sqlite3
-sudo apt install libsqlite3-dev
+## База данных
+
+Выбор базы данных (БД) был остановлен на `sqlite3` в силу её простоты и гибкости. Поэтому в дальнейшем будем предполагать все действия именно с БД типа `sqlite`.
+
+Данное приложение может быть использовано для произвольного города. Для этого необходимо построить свою БД по приведённой схеме
+
+![alt text](https://github.com/qpqq/shadows/blob/master/pic/shadow_db.png)
+
+При тестировании г. Москва БД была взята из [OSM](https://www.openstreetmap.org/).
+
+Проверить полученные данные можно [здесь](https://overpass-turbo.eu/).
+
+Тестовую БД, инструкцию по установке и всю необходимую информацию можно получить по адресам
+
+[comment]: <> (i want to see your email down here, add it if you don't mind  nikonov.mo@phystech.edu)
+
+```
+sharapov.d@phystech.edu
 ```
 
-Устанавливаем сам проект и скачиваем модули
+## Установка
+
+Для начала перейдём в рабочую папку и скачаем проект из репозитория 
 
 ```bash
 cd <work_path>
 git clone https://github.com/qpqq/shadows.git
+```
+
+Затем перейдём в папку `shadows` и скачаем необходимые модули
+
+```bash
 cd shadows
 git submodule update --init --recursive
 ```
 
+После чего проверим, что `make` установлен
+
+```bash
+sudo apt install make
+```
+
+Наконец убедимся, что необходимые пакеты установлены
+
+```bash
+sudo make packages
+```
+
+**Внимание!** Перед запуском готовую к работе БД нужно положить в папку `shadows`.
+
 ## Запуск
 
-Перейти в папку `build`, скомпилировать, запустить
+Перейдём в папку `build` и скомпилируем
 
 ```bash
 cd build
-cmake ..
-cmake --build . -j 8
+make build
+```
+
+Остаётся только запустить
+
+```bash
 sudo ./shadows
 ```
 
-Дальше вбить в браузере `localhost` или `http://localhost`, откроется сам сайт
+и вбить в рабочем браузере `localhost` или `http://localhost`
 
 ## Использование
 
