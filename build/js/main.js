@@ -105,9 +105,10 @@ ymaps.ready(function () {
             }
             else{
                 myMap.geoObjects.removeAll(); //Чистим карту от лишнего перед построением
+                let route;
                 for(let i = 0; i < routeCoords["routeCoords"].length; i++){ 
                     if(i < routeCoords["routeCoords"].length-1){ //Составление маршрута с учетом цвета, который зависит от затененности участка
-                        let route = new ymaps.Polyline([
+                         route = new ymaps.Polyline([
                             routeCoords["routeCoords"][i],
                             routeCoords["routeCoords"][i+1]
                             ] ,{},
